@@ -33,6 +33,32 @@
 		const final_amount = crit_type === 'deduction' ? -amount : amount;
 		onValueChange(current + final_amount);
 	}
+
+	let holdInterval: ReturnType<typeof setInterval> | undefined;
+	let holdDelay = 150;
+
+	function startHold(amount: number, crit_type: (typeof tag)['type']) {
+		changeValue(amount, crit_type);
+
+		holdDelay = 150;
+
+		function tick() {
+			changeValue(amount, crit_type);
+
+			holdDelay = Math.max(30, holdDelay - 10);
+
+			holdInterval = setTimeout(tick, holdDelay);
+		}
+
+		holdInterval = setTimeout(tick, holdDelay);
+	}
+
+	function stopHold() {
+		if (holdInterval) {
+			clearTimeout(holdInterval);
+			holdInterval = undefined;
+		}
+	}
 </script>
 
 {#if tag.value_type === 'enum'}
@@ -55,8 +81,11 @@
 			variant="outline"
 			size="icon"
 			class="h-9 w-9 rounded-r-none"
-			onclick={() => changeValue(-1, tag.type)}
-			disabled={Number(Math.abs(Number(value)) ?? 0) <= 0}
+			onpointerdown={() => startHold(-1, tag.type)}
+			onpointerup={stopHold}
+			onpointerleave={stopHold}
+			onpointercancel={stopHold}
+			disabled={Number(value ?? 0) <= 0}
 		>
 			−
 		</Button>
@@ -76,7 +105,10 @@
 			variant="outline"
 			size="icon"
 			class="h-9 w-9 rounded-l-none"
-			onclick={() => changeValue(1, tag.type)}
+			onpointerdown={() => startHold(1, tag.type)}
+			onpointerup={stopHold}
+			onpointerleave={stopHold}
+			onpointercancel={stopHold}
 			disabled={tag.max !== undefined && Math.abs(Number(value)) >= tag.max}
 		>
 			+

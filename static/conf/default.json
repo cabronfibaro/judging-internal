@@ -2,7 +2,7 @@
   "name": "Default",
   "categories": {
     "common": {
-      "label": "Style Criteria (20 points)",
+      "label": "Style Criteria",
       "tags": [
         {
           "id": "common_initiation",
@@ -28,7 +28,7 @@
       ]
     },
     "lead": {
-      "label": "Lead Criteria (80 points)",
+      "label": "Lead Criteria",
       "tags": [
         {
           "id": "lead_filled_n_zones",
@@ -77,7 +77,8 @@
           "id": "chase_proximity_quality",
           "label": "Proximity Quality",
           "type": "bonus",
-          "value_type": "dynamic"
+          "value_type": "dynamic",
+          "max": 10
         },
         {
           "id": "chase_angle",
@@ -90,7 +91,8 @@
           "id": "chase_line_quality",
           "label": "Line Quality",
           "type": "bonus",
-          "value_type": "dynamic"
+          "value_type": "dynamic",
+          "max": 10
         },
         {
           "id": "chase_wheels_off",
