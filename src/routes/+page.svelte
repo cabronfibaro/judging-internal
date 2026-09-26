@@ -1,6 +1,7 @@
 <script lang="ts">
 	import CommoncriteriaCard from '$lib/components/judging/commoncriteria-card.svelte';
 	import CriteriaCard from '$lib/components/judging/criteria-card.svelte';
+	import DebugJudgement from '$lib/components/judging/debug-judgement.svelte';
 	import StageCard from '$lib/components/judging/stage-card.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
@@ -62,16 +63,13 @@
 
 	<Card>
 		<CardHeader class="pb-3">
-			<CardTitle>Judgment</CardTitle>
+			<CardTitle>Judgement</CardTitle>
 		</CardHeader>
 
-		<CardContent class="space-y-3">
-			<pre class="overflow-auto rounded-md bg-muted p-3 text-sm">{JSON.stringify(
-					judgement.results,
-					null,
-					2
-				)}</pre>
+		<!-- TODO: show score between participants -->
 
+		<CardContent class="space-y-3">
+			<DebugJudgement show results={judgement.results} />
 			<Button class="w-full" onclick={onSubmitJudgement}>Submit Judgment</Button>
 			<Button variant="destructive" type="reset" class="w-full" onclick={() => judgement.clear()}
 				>Reset</Button
