@@ -1,0 +1,89 @@
+<script lang="ts">
+	import Criteriacontrol from './criteria-control.svelte';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import { Separator } from '$lib/components/ui/separator';
+	import type { CriteriaCatrgory } from '../../../types';
+	import type { Judgement } from '$lib/judging/judgement.svelte';
+
+	let {
+		category,
+		judgement
+	}: {
+		category: CriteriaCatrgory;
+		judgement: Judgement;
+	} = $props();
+
+	function getBadgeVariant(type: string) {
+		if (type === 'bonus') return 'default';
+		if (type === 'deduction') return 'destructive';
+		return 'secondary';
+	}
+</script>
+
+<Card class="col-span-2">
+	<CardHeader class="pb-3">
+		<CardTitle>{category.label}</CardTitle>
+	</CardHeader>
+
+	<CardContent class="space-y-3">
+		<!-- Column headers -->
+		<div class="grid grid-cols-[1fr_224px_224px] items-center gap-4 px-1">
+			<div></div>
+			<div class="w-[144px] justify-self-end text-center text-sm font-medium">Lead</div>
+			<div class="w-[144px] justify-self-end text-center text-sm font-medium">Chase</div>
+		</div>
+
+		{#each category.tags as tag, index (tag.id)}
+			{#if index > 0}
+				<Separator />
+			{/if}
+
+			<div class="grid grid-cols-[1fr_224px_224px] items-center gap-4 py-2">
+				<div class="min-w-0">
+					<div class="flex items-center gap-3">
+						<span class="truncate text-sm font-medium">
+							{tag.label}
+						</span>
+
+						{#if tag.max !== undefined}
+							<span class="shrink-0 text-xs text-muted-foreground tabular-nums">
+								{Math.abs((judgement.get(tag.id)?.lead ?? 0) / (tag.multiplier ?? 1))}/{(tag.max ??
+									0) / (tag.multiplier ?? 1)}
+							</span>
+							<span class="shrink-0 text-xs text-muted-foreground tabular-nums"> | </span>
+							<span class="shrink-0 text-xs text-muted-foreground tabular-nums">
+								{Math.abs((judgement.get(tag.id)?.chase ?? 0) / (tag.multiplier ?? 1))}/{(tag.max ??
+									0) / (tag.multiplier ?? 1)}
+							</span>
+						{/if}
+
+						{#if tag.type !== 'neutral'}
+							<Badge variant={getBadgeVariant(tag.type)} class="shrink-0 text-xs">
+								{tag.type}
+							</Badge>
+						{/if}
+					</div>
+				</div>
+
+				<!-- Lead -->
+				<div class="w-[144px] justify-self-end">
+					<Criteriacontrol
+						{tag}
+						value={judgement.get(tag.id)?.lead}
+						onValueChange={(value) => judgement.set(tag.id, 'lead', Number(value))}
+					/>
+				</div>
+
+				<!-- Chase -->
+				<div class="w-[144px] justify-self-end">
+					<Criteriacontrol
+						{tag}
+						value={judgement.get(tag.id)?.chase}
+						onValueChange={(value) => judgement.set(tag.id, 'chase', Number(value))}
+					/>
+				</div>
+			</div>
+		{/each}
+	</CardContent>
+</Card>

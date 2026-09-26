@@ -1,3 +1,8 @@
+export type CriteriaCatrgory = {
+	label: string;
+	tags: Tag[];
+};
+
 export type Option = {
 	label: string;
 	value: number;

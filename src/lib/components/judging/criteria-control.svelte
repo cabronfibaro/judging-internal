@@ -85,7 +85,7 @@
 			onpointerup={stopHold}
 			onpointerleave={stopHold}
 			onpointercancel={stopHold}
-			disabled={Number(value ?? 0) <= 0}
+			disabled={Math.abs(Number(value ?? 0)) <= 0}
 		>
 			−
 		</Button>
