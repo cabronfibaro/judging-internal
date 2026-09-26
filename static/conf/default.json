@@ -1,0 +1,110 @@
+{
+  "name": "Default",
+  "categories": {
+    "common": {
+      "label": "Style Criteria (20 points)",
+      "tags": [
+        {
+          "id": "common_initiation",
+          "label": "Initiation",
+          "type": "neutral",
+          "value_type": "dynamic",
+          "max": 5
+        },
+        {
+          "id": "common_fluidity",
+          "label": "Fluidity",
+          "type": "neutral",
+          "value_type": "dynamic",
+          "max": 10
+        },
+        {
+          "id": "common_commitment",
+          "label": "Commitment",
+          "type": "neutral",
+          "value_type": "dynamic",
+          "max": 5
+        }
+      ]
+    },
+    "lead": {
+      "label": "Lead Criteria (80 points)",
+      "tags": [
+        {
+          "id": "lead_filled_n_zones",
+          "label": "Filled Zones",
+          "type": "neutral",
+          "value_type": "dynamic",
+          "max": 5
+        },
+        {
+          "id": "lead_angle",
+          "label": "Angle",
+          "type": "neutral",
+          "value_type": "dynamic"
+        },
+        {
+          "id": "lead_line_quality",
+          "label": "Line Quality",
+          "type": "bonus",
+          "value_type": "dynamic"
+        },
+        {
+          "id": "lead_wheels_off",
+          "label": "Wheels Off Track",
+          "type": "deduction",
+          "value_type": "dynamic"
+        },
+        {
+          "id": "lead_dnf",
+          "label": "Do Not Finish",
+          "type": "deduction",
+          "value_type": "switch",
+          "default_value": -999
+        }
+      ]
+    },
+    "chase": {
+      "label": "Chase Criteria",
+      "tags": [
+        {
+          "id": "chase_proximity_quality",
+          "label": "Proximity Quality",
+          "type": "bonus",
+          "value_type": "dynamic"
+        },
+        {
+          "id": "chase_angle",
+          "label": "Angle",
+          "type": "neutral",
+          "value_type": "dynamic"
+        },
+        {
+          "id": "chase_ran_lower_line",
+          "label": "Ran Lower Line",
+          "type": "deduction",
+          "value_type": "dynamic"
+        },
+        {
+          "id": "chase_line_quality",
+          "label": "Line Quality",
+          "type": "bonus",
+          "value_type": "dynamic"
+        },
+        {
+          "id": "chase_wheels_off",
+          "label": "Wheels Off Track",
+          "type": "deduction",
+          "value_type": "dynamic"
+        },
+        {
+          "id": "chase_dnf",
+          "label": "Do Not Finish",
+          "type": "deduction",
+          "value_type": "switch",
+          "default_value": -999
+        }
+      ]
+    }
+  }
+}
