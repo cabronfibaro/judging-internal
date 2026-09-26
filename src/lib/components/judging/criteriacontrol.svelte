@@ -23,6 +23,13 @@
 
 	function changeValue(amount: number, crit_type: (typeof tag)['type']) {
 		const current = Number(value ?? 0);
+
+		let multiplier = 1;
+		if (tag.multiplier) {
+			multiplier = tag.multiplier;
+		}
+
+		amount = amount * multiplier;
 		const final_amount = crit_type === 'deduction' ? -amount : amount;
 		onValueChange(current + final_amount);
 	}
@@ -70,7 +77,7 @@
 			size="icon"
 			class="h-9 w-9 rounded-l-none"
 			onclick={() => changeValue(1, tag.type)}
-			disabled={tag.max !== undefined && Number(value) >= tag.max}
+			disabled={tag.max !== undefined && Math.abs(Number(value)) >= tag.max}
 		>
 			+
 		</Button>

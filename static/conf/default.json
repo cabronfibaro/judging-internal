@@ -35,25 +35,31 @@
           "label": "Filled Zones",
           "type": "neutral",
           "value_type": "dynamic",
-          "max": 5
+          "max": 30,
+          "multiplier": 6
         },
         {
           "id": "lead_angle",
           "label": "Angle",
           "type": "neutral",
-          "value_type": "dynamic"
+          "value_type": "dynamic",
+          "max": 20
         },
         {
           "id": "lead_line_quality",
           "label": "Line Quality",
           "type": "bonus",
-          "value_type": "dynamic"
+          "value_type": "dynamic",
+          "max": 30,
+          "multiplier": 6
         },
         {
           "id": "lead_wheels_off",
           "label": "Wheels Off Track",
           "type": "deduction",
-          "value_type": "dynamic"
+          "value_type": "dynamic",
+          "max": 100,
+          "multiplier": 25
         },
         {
           "id": "lead_dnf",
@@ -77,13 +83,8 @@
           "id": "chase_angle",
           "label": "Angle",
           "type": "neutral",
-          "value_type": "dynamic"
-        },
-        {
-          "id": "chase_ran_lower_line",
-          "label": "Ran Lower Line",
-          "type": "deduction",
-          "value_type": "dynamic"
+          "value_type": "dynamic",
+          "max": 20
         },
         {
           "id": "chase_line_quality",
@@ -95,7 +96,9 @@
           "id": "chase_wheels_off",
           "label": "Wheels Off Track",
           "type": "deduction",
-          "value_type": "dynamic"
+          "value_type": "dynamic",
+          "max": 100,
+          "multiplier": 25
         },
         {
           "id": "chase_dnf",

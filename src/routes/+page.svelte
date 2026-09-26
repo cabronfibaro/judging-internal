@@ -121,7 +121,11 @@
 									<Label class="text-sm font-medium">
 										{tag.label}
 									</Label>
-
+									{#if tag.max}
+										<Label class="text-sm font-medium"
+											>{judgement.get(tag.id)?.lead ?? 0}/{tag.max / (tag.multiplier ?? 1)}</Label
+										>
+									{/if}
 									<Badge variant={getBadgeVariant(tag.type)} class="text-xs">
 										{tag.type}
 									</Badge>
@@ -169,6 +173,14 @@
 									{tag.label}
 								</Label>
 
+								{#if tag.max}
+									<Label class="text-sm font-medium">
+										{Math.abs(
+											(judgement.get(tag.id)?.lead ?? 0) / (tag.multiplier ?? 1)
+										)}/{(tag.max ?? 0) / (tag.multiplier ?? 1)}
+									</Label>
+								{/if}
+
 								<Badge variant={getBadgeVariant(tag.type)} class="text-xs">
 									{tag.type}
 								</Badge>
@@ -204,6 +216,14 @@
 								<Label class="text-sm font-medium">
 									{tag.label}
 								</Label>
+
+								{#if tag.max}
+									<Label class="text-sm font-medium">
+										{Math.abs(
+											(judgement.get(tag.id)?.lead ?? 0) / (tag.multiplier ?? 1)
+										)}/{(tag.max ?? 0) / (tag.multiplier ?? 1)}
+									</Label>
+								{/if}
 
 								<Badge variant={getBadgeVariant(tag.type)} class="text-xs">
 									{tag.type}
