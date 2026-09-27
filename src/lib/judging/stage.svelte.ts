@@ -26,6 +26,7 @@ const defaultValue: State = {
 };
 
 class Stage {
+	isQualifying = $state(false);
 	state = $state(defaultValue);
 
 	updateDriver(driver: keyof State, field: keyof Driver, value: string | number) {

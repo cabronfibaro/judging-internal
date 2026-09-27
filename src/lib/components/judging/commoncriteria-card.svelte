@@ -22,10 +22,10 @@
 </script>
 
 <Card class="col-span-2">
-	<CardHeader class="pb-3">
+	<CardHeader>
 		<CardTitle>{category.label}</CardTitle>
 	</CardHeader>
-
+	<Separator />
 	<CardContent class="space-y-3">
 		<!-- Column headers -->
 		<div class="grid grid-cols-[1fr_224px_224px] items-center gap-4 px-1">

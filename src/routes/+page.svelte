@@ -15,8 +15,8 @@
 	let { data } = $props();
 	const criteriaConfig = $derived(data.criteriaConfig);
 
-	const judgement = new Judgement();
-	const stage = new Stage();
+	let judgement = new Judgement();
+	let stage = new Stage();
 
 	function onSubmitJudgement() {
 		stage.setScore(judgement.finalizedScore());
@@ -44,7 +44,14 @@
 
 	<StageCard {stage} />
 
-	<div class="grid grid-cols-2 gap-4">
+	<div
+		class="grid"
+		class:grid-cols-1={stage.isQualifying}
+		class:gap-0={stage.isQualifying}
+		class:gap-y-4={stage.isQualifying}
+		class:gap-4={!stage.isQualifying}
+		class:grid-cols-2={!stage.isQualifying}
+	>
 		{#if common}
 			{@const [, category] = common}
 			<CommoncriteriaCard {category} {judgement} />
@@ -55,7 +62,7 @@
 			<CriteriaCard {category} role="lead" {judgement} />
 		{/if}
 
-		{#if chase}
+		{#if chase && !stage.isQualifying}
 			{@const [, category] = chase}
 			<CriteriaCard {category} role="lead" {judgement} />
 		{/if}

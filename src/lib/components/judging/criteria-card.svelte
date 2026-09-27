@@ -2,6 +2,7 @@
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import type { Judgement } from '$lib/judging/judgement.svelte';
 	import type { CriteriaCatrgory } from '../../../types';
+	import Separator from '../ui/separator/separator.svelte';
 	import CriterionRow from './criterion-row.svelte';
 
 	let {
@@ -16,10 +17,10 @@
 </script>
 
 <Card>
-	<CardHeader class="pb-3">
+	<CardHeader>
 		<CardTitle>{category.label}</CardTitle>
 	</CardHeader>
-
+	<Separator />
 	<CardContent class="space-y-3">
 		{#each category.tags as tag, index (tag.id)}
 			<CriterionRow

@@ -48,7 +48,7 @@
         {
           "id": "lead_line_quality",
           "label": "Line Quality",
-          "type": "bonus",
+          "type": "neutral",
           "value_type": "dynamic",
           "max": 30,
           "multiplier": 6
@@ -76,7 +76,7 @@
         {
           "id": "chase_proximity_quality",
           "label": "Proximity Quality",
-          "type": "bonus",
+          "type": "neutral",
           "value_type": "dynamic",
           "max": 10
         },
@@ -90,7 +90,7 @@
         {
           "id": "chase_line_quality",
           "label": "Line Quality",
-          "type": "bonus",
+          "type": "neutral",
           "value_type": "dynamic",
           "max": 10
         },
