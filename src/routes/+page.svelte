@@ -3,6 +3,8 @@
 	import CriteriaCard from '$lib/components/judging/criteria-card.svelte';
 	import DebugJudgement from '$lib/components/judging/debug-judgement.svelte';
 	import StageCard from '$lib/components/judging/stage-card.svelte';
+	import TournamentDialog from '$lib/components/tournament/tournament-dialog.svelte';
+	import TournamentGrid from '$lib/components/tournament/tournament-grid.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
@@ -37,6 +39,8 @@
 </script>
 
 <div class="mx-auto max-w-4xl space-y-4 p-6">
+	<TournamentDialog />
+	<TournamentGrid />
 	<div>
 		<h1 class="text-2xl font-bold">Using: {criteriaConfig.name} config</h1>
 		<p class="text-muted-foreground">Lorem ipsum jembut delemut</p>

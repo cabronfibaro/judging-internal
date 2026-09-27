@@ -19,6 +19,12 @@ export const participants = sqliteTable('participants', {
 
 	name: text('name').notNull(),
 
+	tournamentId: text('tournament_id')
+		.notNull()
+		.references(() => tournaments.id, {
+			onDelete: 'cascade'
+		}),
+
 	...timestamps
 });
 
@@ -58,7 +64,9 @@ export const qualifiers = sqliteTable('qualifiers', {
 
 	tournamentId: text('tournament_id')
 		.notNull()
-		.references(() => tournaments.id),
+		.references(() => tournaments.id, {
+			onDelete: 'cascade'
+		}),
 
 	participantId: text('participant_id')
 		.notNull()
@@ -75,7 +83,12 @@ export const qualifiers = sqliteTable('qualifiers', {
 	...timestamps
 });
 
-export const participantsRelations = relations(participants, ({ many }) => ({
+export const participantsRelations = relations(participants, ({ one, many }) => ({
+	tournament: one(tournaments, {
+		fields: [participants.tournamentId],
+		references: [tournaments.id]
+	}),
+
 	qualifiers: many(qualifiers)
 }));
 

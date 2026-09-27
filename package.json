@@ -13,9 +13,9 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"db:generate": "drizzle-kit generate --config=src/lib/server/db/drizzle.config.ts",
-		"db:migrate":  "drizzle-kit migrate  --config=src/lib/server/db/drizzle.config.ts",
-		"db:push":     "drizzle-kit push     --config=src/lib/server/db/drizzle.config.ts",
-		"db:studio":   "drizzle-kit studio   --config=src/lib/server/db/drizzle.config.ts"
+		"db:migrate": "drizzle-kit migrate  --config=src/lib/server/db/drizzle.config.ts",
+		"db:push": "drizzle-kit push     --config=src/lib/server/db/drizzle.config.ts",
+		"db:studio": "drizzle-kit studio   --config=src/lib/server/db/drizzle.config.ts"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
@@ -50,6 +50,7 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"@tanstack/svelte-query": "^6.3.0",
 		"better-sqlite3": "^13.0.3",
 		"drizzle-orm": "^0.45.3",
 		"mode-watcher": "^1.1.0"
