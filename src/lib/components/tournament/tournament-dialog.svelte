@@ -21,7 +21,7 @@
 	let name = $state('');
 	let startingDate = $state('');
 	let trackName = $state('');
-	let qualifierNames = $state('');
+	let entrantNames = $state('');
 
 	const queryClient = useQueryClient();
 
@@ -30,12 +30,12 @@
 			name,
 			startingDate,
 			track,
-			qualifiers
+			entrants
 		}: {
 			name: string;
 			startingDate: string;
 			track: string;
-			qualifiers: string[];
+			entrants: string[];
 		}) => {
 			const response = await fetch('/api/tournaments', {
 				method: 'POST',
@@ -46,7 +46,7 @@
 					name,
 					startingDate,
 					track,
-					qualifiers
+					entrants
 				})
 			});
 
@@ -69,7 +69,7 @@
 			name = '';
 			startingDate = '';
 			trackName = '';
-			qualifierNames = '';
+			entrantNames = '';
 			error = '';
 		}
 	}));
@@ -92,12 +92,12 @@
 			return;
 		}
 
-		const qualifiers = qualifierNames
+		const entrants = entrantNames
 			.split('\n')
 			.map((name) => name.trim())
 			.filter(Boolean);
 
-		if (qualifiers.length === 0) {
+		if (entrants.length === 0) {
 			error = 'At least one qualifier is required.';
 			return;
 		}
@@ -106,7 +106,7 @@
 			name: name.trim(),
 			startingDate,
 			track: trackName.trim(),
-			qualifiers
+			entrants
 		});
 	}
 </script>
@@ -145,14 +145,14 @@
 			</div>
 
 			<div class="space-y-2">
-				<Label for="qualifiers">Qualifiers</Label>
+				<Label for="Entrants">Entrants</Label>
 
 				<Textarea
-					id="qualifiers"
+					id="Entrants"
 					// eslint-disable-next-line svelte/no-useless-mustaches
 					placeholder={'One participant per line \nJohn Doe\nJane Doe\nAlex Smith'}
 					rows={8}
-					bind:value={qualifierNames}
+					bind:value={entrantNames}
 				/>
 
 				<p class="text-sm text-muted-foreground">Enter one participant name per line.</p>

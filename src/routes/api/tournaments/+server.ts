@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
-import { participants, qualifiers, tournaments, tracks } from '$lib/server/db/schema';
+import { participants, entrants, tournaments, tracks } from '$lib/server/db/schema';
 import { db } from '$lib/server/db/client';
 
 export async function GET() {
@@ -10,7 +10,8 @@ export async function GET() {
 				id: tournaments.id,
 				name: tournaments.name,
 				startingDate: tournaments.startingDate,
-				track: tracks.name
+				track: tracks.name,
+				qualifyingOrder: tournaments.qualifyingOrder
 			})
 			.from(tournaments)
 			.leftJoin(tracks, eq(tournaments.trackId, tracks.id));
@@ -28,21 +29,27 @@ export async function GET() {
 export async function POST({ request }) {
 	const body = await request.json();
 
-	const { name, startingDate, track, qualifiers: qualifierNames } = body;
+	const { name, startingDate, track, entrants: entrantsNames } = body;
 
 	if (
 		typeof name !== 'string' ||
 		typeof startingDate !== 'string' ||
 		typeof track !== 'string' ||
-		!Array.isArray(qualifierNames)
+		!Array.isArray(entrantsNames)
 	) {
 		return json({ message: 'Invalid request body.' }, { status: 400 });
 	}
 
-	const names = qualifierNames
+	const names = entrantsNames
 		.filter((name): name is string => typeof name === 'string')
 		.map((name) => name.trim())
 		.filter(Boolean);
+
+	const qualifyingOrder = Array.from({ length: names.length }, (_, i) => i);
+	for (let i = qualifyingOrder.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[qualifyingOrder[i], qualifyingOrder[j]] = [qualifyingOrder[j], qualifyingOrder[i]];
+	}
 
 	const tournamentName = name.trim();
 	const trackName = track.trim();
@@ -83,7 +90,8 @@ export async function POST({ request }) {
 				.values({
 					name: tournamentName,
 					startingDate: date,
-					trackId: trackRow.id
+					trackId: trackRow.id,
+					qualifyingOrder: qualifyingOrder.join(', ')
 				})
 				.returning()
 				.all();
@@ -117,7 +125,7 @@ export async function POST({ request }) {
 				});
 			}
 
-			tx.insert(qualifiers).values(qualifierRows).run();
+			tx.insert(entrants).values(qualifierRows).run();
 
 			return createdTournament;
 		});

@@ -21,9 +21,17 @@
 	let stage = new Stage();
 
 	function onSubmitJudgement() {
-		stage.setScore(judgement.finalizedScore());
+		const { lead, chase } = judgement.finalizedScore();
+		stage.setScore({ lead, chase });
 		judgement.clear();
 
+		if (!stage.isQualifying) {
+			handleBattle();
+			return;
+		}
+	}
+
+	function handleBattle() {
 		if (stage.isConcluded()) {
 			console.log(stage.winner());
 			return;
@@ -40,7 +48,7 @@
 
 <div class="mx-auto max-w-4xl space-y-4 p-6">
 	<TournamentDialog />
-	<TournamentGrid />
+	<TournamentGrid {stage} />
 	<div>
 		<h1 class="text-2xl font-bold">Using: {criteriaConfig.name} config</h1>
 		<p class="text-muted-foreground">Lorem ipsum jembut delemut</p>
@@ -58,7 +66,7 @@
 	>
 		{#if common}
 			{@const [, category] = common}
-			<CommoncriteriaCard {category} {judgement} />
+			<CommoncriteriaCard {category} {judgement} isQualifying={stage.isQualifying} />
 		{/if}
 
 		{#if lead}

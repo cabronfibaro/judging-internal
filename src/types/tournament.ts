@@ -1,0 +1,7 @@
+export type Entrants = {
+	id: string;
+	participantId: string;
+	name: string;
+	status: 'qualified' | 'not_qualified' | 'pending';
+	score: number;
+};

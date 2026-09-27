@@ -13,12 +13,16 @@
 		DialogTitle
 	} from '$lib/components/ui/dialog';
 	import Skeleton from '../ui/skeleton/skeleton.svelte';
+	import type { Stage } from '$lib/judging/stage.svelte';
+
+	let { stage }: { stage: Stage } = $props();
 
 	type Tournament = {
 		id: string;
 		name: string;
 		startingDate: Date | string;
 		track: string | null;
+		qualifyingOrder: string;
 	};
 
 	const queryClient = useQueryClient();
@@ -76,6 +80,49 @@
 		if (!selectedTournament) return;
 
 		deleteTournamentMutation.mutate(selectedTournament.id);
+	}
+
+	let selectedTournamentId = $state<string | null>(null);
+
+	type Qualifier = {
+		id: string;
+		participantId: string;
+		name: string;
+		status: 'qualified' | 'not_qualified' | 'pending';
+		score: number;
+	};
+
+	async function fetchEntrants(tournamentId: string): Promise<Qualifier[]> {
+		const response = await fetch(`/api/tournaments/${tournamentId}/entrants`);
+
+		if (!response.ok) {
+			throw new Error('Failed to load entrants.');
+		}
+
+		const data = await response.json();
+
+		return data.entrants;
+	}
+
+	// TODO: SHOW TOAST AFTER LOAD
+	async function onLoadTournament(tournament: Tournament) {
+		const entrants = await queryClient.query({
+			queryKey: ['tournament-entrants', tournament.id],
+			queryFn: () => fetchEntrants(tournament.id)
+		});
+
+		stage.tournamentId = tournament.id;
+
+		const isQualifying = entrants.reduce(
+			(result, qualifier) => result || qualifier.status === 'pending',
+			false
+		);
+
+		if (isQualifying) {
+			stage.enqueueEntrants(entrants, tournament.qualifyingOrder);
+		}
+
+		selectedTournamentId = tournament.id;
 	}
 </script>
 
@@ -168,8 +215,7 @@
 					</div>
 
 					<div class="flex gap-2">
-						<Button>Load</Button>
-
+						<Button onclick={() => onLoadTournament(tournament)}>Load</Button>
 						<Button variant="destructive" onclick={() => openDeleteDialog(tournament)}>
 							Delete
 						</Button>

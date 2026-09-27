@@ -23,6 +23,7 @@ export const tracks = sqliteTable('tracks', {
 	...timestamps
 });
 
+// TODO: should have option to randomize qualifying order or not
 export const tournaments = sqliteTable('tournaments', {
 	id: text('id')
 		.primaryKey()
@@ -35,6 +36,8 @@ export const tournaments = sqliteTable('tournaments', {
 	trackId: text('track_id')
 		.notNull()
 		.references(() => tracks.id),
+
+	qualifyingOrder: text('qualifying_order').notNull(),
 
 	...timestamps
 });
@@ -55,7 +58,7 @@ export const participants = sqliteTable('participants', {
 	...timestamps
 });
 
-export const qualifiers = sqliteTable('qualifiers', {
+export const entrants = sqliteTable('entrants', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => nanoid(15)),

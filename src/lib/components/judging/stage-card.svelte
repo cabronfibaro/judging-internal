@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Stage } from '$lib/judging/stage.svelte';
+	import EntrantList from '../tournament/entrant-list.svelte';
 	import Badge from '../ui/badge/badge.svelte';
 	import CardContent from '../ui/card/card-content.svelte';
 	import CardHeader from '../ui/card/card-header.svelte';
@@ -29,6 +30,8 @@
 					<Label>Qualifying Mode</Label>
 				</div>
 				<Switch
+					disabled
+					checked={stage.isQualifying}
 					onCheckedChange={(checked) => {
 						stage.isQualifying = checked;
 					}}
@@ -37,7 +40,7 @@
 		</div>
 
 		{#if stage.isQualifying}
-			<!-- // -->
+			<EntrantList {stage} />
 		{/if}
 
 		{#if !stage.isQualifying}

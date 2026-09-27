@@ -8,10 +8,12 @@
 
 	let {
 		category,
-		judgement
+		judgement,
+		isQualifying
 	}: {
 		category: CriteriaCatrgory;
 		judgement: Judgement;
+		isQualifying: boolean;
 	} = $props();
 
 	function getBadgeVariant(type: string) {
@@ -30,8 +32,8 @@
 		<!-- Column headers -->
 		<div class="grid grid-cols-[1fr_224px_224px] items-center gap-4 px-1">
 			<div></div>
-			<div class="w-[144px] justify-self-end text-center text-sm font-medium">Lead</div>
-			<div class="w-[144px] justify-self-end text-center text-sm font-medium">Chase</div>
+			<div class="w-36 justify-self-end text-center text-sm font-medium">Lead</div>
+			<div class="w-36 justify-self-end text-center text-sm font-medium">Chase</div>
 		</div>
 
 		{#each category.tags as tag, index (tag.id)}
@@ -51,11 +53,14 @@
 								{Math.abs((judgement.get(tag.id)?.lead ?? 0) / (tag.multiplier ?? 1))}/{(tag.max ??
 									0) / (tag.multiplier ?? 1)}
 							</span>
-							<span class="shrink-0 text-xs text-muted-foreground tabular-nums"> | </span>
-							<span class="shrink-0 text-xs text-muted-foreground tabular-nums">
-								{Math.abs((judgement.get(tag.id)?.chase ?? 0) / (tag.multiplier ?? 1))}/{(tag.max ??
-									0) / (tag.multiplier ?? 1)}
-							</span>
+							{#if !isQualifying}
+								<span class="shrink-0 text-xs text-muted-foreground tabular-nums"> | </span>
+								<span class="shrink-0 text-xs text-muted-foreground tabular-nums">
+									{Math.abs(
+										(judgement.get(tag.id)?.chase ?? 0) / (tag.multiplier ?? 1)
+									)}/{(tag.max ?? 0) / (tag.multiplier ?? 1)}
+								</span>
+							{/if}
 						{/if}
 
 						{#if tag.type !== 'neutral'}
@@ -67,7 +72,7 @@
 				</div>
 
 				<!-- Lead -->
-				<div class="w-[144px] justify-self-end">
+				<div class="w-36 justify-self-end">
 					<Criteriacontrol
 						{tag}
 						value={judgement.get(tag.id)?.lead}
@@ -76,7 +81,7 @@
 				</div>
 
 				<!-- Chase -->
-				<div class="w-[144px] justify-self-end">
+				<div class="w-36 justify-self-end">
 					<Criteriacontrol
 						{tag}
 						value={judgement.get(tag.id)?.chase}
