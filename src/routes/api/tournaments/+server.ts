@@ -104,7 +104,8 @@ export async function POST({ request }) {
 					[participant] = tx
 						.insert(participants)
 						.values({
-							name: participantName
+							name: participantName,
+							tournamentId: createdTournament.id
 						})
 						.returning()
 						.all();

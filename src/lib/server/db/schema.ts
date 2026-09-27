@@ -1,4 +1,3 @@
-import { relations } from 'drizzle-orm';
 import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { nanoid } from 'nanoid';
 
@@ -12,22 +11,6 @@ const timestamps = {
 		.$defaultFn(() => new Date())
 };
 
-export const participants = sqliteTable('participants', {
-	id: text('id')
-		.primaryKey()
-		.$defaultFn(() => nanoid(15)),
-
-	name: text('name').notNull(),
-
-	tournamentId: text('tournament_id')
-		.notNull()
-		.references(() => tournaments.id, {
-			onDelete: 'cascade'
-		}),
-
-	...timestamps
-});
-
 export const tracks = sqliteTable('tracks', {
 	id: text('id')
 		.primaryKey()
@@ -35,7 +18,6 @@ export const tracks = sqliteTable('tracks', {
 
 	name: text('name').notNull(),
 
-	// JSON configuration for the track
 	config: text('config', { mode: 'json' }).$type<Record<string, unknown>>(),
 
 	...timestamps
@@ -53,6 +35,22 @@ export const tournaments = sqliteTable('tournaments', {
 	trackId: text('track_id')
 		.notNull()
 		.references(() => tracks.id),
+
+	...timestamps
+});
+
+export const participants = sqliteTable('participants', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => nanoid(15)),
+
+	name: text('name').notNull(),
+
+	tournamentId: text('tournament_id')
+		.notNull()
+		.references(() => tournaments.id, {
+			onDelete: 'cascade'
+		}),
 
 	...timestamps
 });
@@ -82,37 +80,3 @@ export const qualifiers = sqliteTable('qualifiers', {
 
 	...timestamps
 });
-
-export const participantsRelations = relations(participants, ({ one, many }) => ({
-	tournament: one(tournaments, {
-		fields: [participants.tournamentId],
-		references: [tournaments.id]
-	}),
-
-	qualifiers: many(qualifiers)
-}));
-
-export const tracksRelations = relations(tracks, ({ many }) => ({
-	tournaments: many(tournaments)
-}));
-
-export const tournamentsRelations = relations(tournaments, ({ one, many }) => ({
-	track: one(tracks, {
-		fields: [tournaments.trackId],
-		references: [tracks.id]
-	}),
-
-	qualifiers: many(qualifiers)
-}));
-
-export const qualifiersRelations = relations(qualifiers, ({ one }) => ({
-	tournament: one(tournaments, {
-		fields: [qualifiers.tournamentId],
-		references: [tournaments.id]
-	}),
-
-	participant: one(participants, {
-		fields: [qualifiers.participantId],
-		references: [participants.id]
-	})
-}));

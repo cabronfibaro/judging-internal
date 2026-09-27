@@ -1,1 +1,0 @@
-ALTER TABLE `participants` ADD `tournament_id` text NOT NULL REFERENCES tournaments(id);
