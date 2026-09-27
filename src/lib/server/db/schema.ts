@@ -74,7 +74,7 @@ export const qualifiers = sqliteTable('qualifiers', {
 		enum: ['qualified', 'not_qualified', 'pending']
 	})
 		.notNull()
-		.default('not_qualified'),
+		.default('pending'),
 
 	score: real('score').notNull().default(0),
 
