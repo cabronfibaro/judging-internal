@@ -30,18 +30,26 @@
 	<Separator />
 	<CardContent class="space-y-3">
 		<!-- Column headers -->
-		<div class="grid grid-cols-[1fr_224px_224px] items-center gap-4 px-1">
-			<div></div>
-			<div class="w-36 justify-self-end text-center text-sm font-medium">Lead</div>
-			<div class="w-36 justify-self-end text-center text-sm font-medium">Chase</div>
-		</div>
+
+		{#if !isQualifying}
+			<div class="grid grid-cols-[1fr_224px_224px] items-center gap-4 px-1">
+				<div></div>
+				<div class="w-36 justify-self-end text-center text-sm font-medium">Lead</div>
+
+				<div class="w-36 justify-self-end text-center text-sm font-medium">Chase</div>
+			</div>
+		{/if}
 
 		{#each category.tags as tag, index (tag.id)}
 			{#if index > 0}
 				<Separator />
 			{/if}
 
-			<div class="grid grid-cols-[1fr_224px_224px] items-center gap-4 py-2">
+			<div
+				class:grid-cols-[1fr_224px]={isQualifying}
+				class:grid-cols-[1fr_224px_224px]={!isQualifying}
+				class="grid items-center gap-4 py-2"
+			>
 				<div class="min-w-0">
 					<div class="flex items-center gap-3">
 						<span class="truncate text-sm font-medium">
@@ -80,14 +88,16 @@
 					/>
 				</div>
 
-				<!-- Chase -->
-				<div class="w-36 justify-self-end">
-					<Criteriacontrol
-						{tag}
-						value={judgement.get(tag.id)?.chase}
-						onValueChange={(value) => judgement.set(tag.id, 'chase', Number(value))}
-					/>
-				</div>
+				{#if !isQualifying}
+					<!-- Chase -->
+					<div class="w-36 justify-self-end">
+						<Criteriacontrol
+							{tag}
+							value={judgement.get(tag.id)?.chase}
+							onValueChange={(value) => judgement.set(tag.id, 'chase', Number(value))}
+						/>
+					</div>
+				{/if}
 			</div>
 		{/each}
 	</CardContent>

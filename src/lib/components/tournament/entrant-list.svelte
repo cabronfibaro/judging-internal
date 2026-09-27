@@ -39,7 +39,7 @@
 			status
 		}: {
 			qualifierId: string;
-			status: 'qualified' | 'not_qualified' | 'pending';
+			status: Entrant['status'];
 		}) => {
 			const response = await fetch(
 				`/api/tournaments/${stage.tournamentId}/entrants/${qualifierId}`,
@@ -82,7 +82,7 @@
 		</div>
 
 		<div class="divide-y rounded-md border">
-			{#each stage.queue as qualifier, idx (qualifier.id)}
+			{#each stage.queue as entrant, idx (entrant.id)}
 				<button
 					type="button"
 					class={[
@@ -92,23 +92,23 @@
 				>
 					<div class="flex items-center gap-3">
 						<span class="font-medium">
-							{qualifier.name}
+							{entrant.name}
 						</span>
 
-						{#if qualifier.status === 'pending'}
-							<Badge variant={idx === 0 ? 'default' : 'secondary'}>
-								{idx === 0 ? 'On Going' : 'Pending'}
-							</Badge>
-						{:else if qualifier.status === 'qualified'}
+						{#if entrant.status === 'pending'}
+							{#if idx === 0}
+								<Badge variant="default">On Going</Badge>
+							{/if}
+						{:else if entrant.status === 'qualified'}
 							<Badge>Qualified</Badge>
-						{:else}
+						{:else if entrant.status === 'not_qualified'}
 							<Badge variant="destructive">Not Qualified</Badge>
 						{/if}
 					</div>
 
 					<div class="flex items-center gap-3">
 						<span class="text-lg font-semibold tabular-nums">
-							{qualifier.score}
+							{entrant.status === 'pending' ? 'TBA' : entrant.score}
 						</span>
 
 						<!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -124,16 +124,16 @@
 								<DropdownMenuContent align="end" class="w-48">
 									<DropdownMenuItem
 										onclick={() => moveToFirst(idx)}
-										disabled={idx === 0 || qualifier.status === 'not_qualified'}
+										disabled={idx === 0 || entrant.status === 'not_qualified'}
 									>
 										Move to front
 									</DropdownMenuItem>
 
-									<DropdownMenuItem onclick={() => markAs(qualifier.id, 'not_qualified')}
+									<DropdownMenuItem onclick={() => markAs(entrant.id, 'not_qualified')}
 										>Set as not qualified</DropdownMenuItem
 									>
 
-									<DropdownMenuItem onclick={() => markAs(qualifier.id, 'pending')}
+									<DropdownMenuItem onclick={() => markAs(entrant.id, 'pending')}
 										>Set as pending</DropdownMenuItem
 									>
 								</DropdownMenuContent>

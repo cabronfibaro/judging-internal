@@ -19,7 +19,8 @@ export async function PATCH({ params, request }) {
 		status !== undefined &&
 		status !== 'qualified' &&
 		status !== 'not_qualified' &&
-		status !== 'pending'
+		status !== 'pending' &&
+		status !== 'scored'
 	) {
 		return json({ message: 'Invalid entrant status.' }, { status: 400 });
 	}

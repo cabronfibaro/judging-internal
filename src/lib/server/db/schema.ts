@@ -5,7 +5,6 @@ const timestamps = {
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date()),
-
 	updatedAt: integer('updated_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date())
@@ -15,11 +14,8 @@ export const tracks = sqliteTable('tracks', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => nanoid(15)),
-
 	name: text('name').notNull(),
-
 	config: text('config', { mode: 'json' }).$type<Record<string, unknown>>(),
-
 	...timestamps
 });
 
@@ -28,17 +24,12 @@ export const tournaments = sqliteTable('tournaments', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => nanoid(15)),
-
 	name: text('name').notNull(),
-
 	startingDate: integer('starting_date', { mode: 'timestamp' }).notNull(),
-
 	trackId: text('track_id')
 		.notNull()
 		.references(() => tracks.id),
-
 	qualifyingOrder: text('qualifying_order').notNull(),
-
 	...timestamps
 });
 
@@ -46,15 +37,12 @@ export const participants = sqliteTable('participants', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => nanoid(15)),
-
 	name: text('name').notNull(),
-
 	tournamentId: text('tournament_id')
 		.notNull()
 		.references(() => tournaments.id, {
 			onDelete: 'cascade'
 		}),
-
 	...timestamps
 });
 
@@ -62,24 +50,20 @@ export const entrants = sqliteTable('entrants', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => nanoid(15)),
-
 	tournamentId: text('tournament_id')
 		.notNull()
 		.references(() => tournaments.id, {
 			onDelete: 'cascade'
 		}),
-
 	participantId: text('participant_id')
 		.notNull()
 		.references(() => participants.id),
-
 	status: text('status', {
-		enum: ['qualified', 'not_qualified', 'pending']
+		enum: ['qualified', 'not_qualified', 'pending', 'scored']
 	})
 		.notNull()
 		.default('pending'),
 
 	score: real('score').notNull().default(0),
-
 	...timestamps
 });

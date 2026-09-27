@@ -12,6 +12,7 @@
 	import { Judgement } from '$lib/judging/judgement.svelte.js';
 	import { Stage } from '$lib/judging/stage.svelte.js';
 	import { createMutation } from '@tanstack/svelte-query';
+	import type { Entrant } from '../types/tournament.js';
 
 	// TODO: add note for lead and chase
 
@@ -22,13 +23,21 @@
 	let stage = new Stage();
 
 	const updateEntrantMutation = createMutation(() => ({
-		mutationFn: async ({ entrantId, score }: { entrantId: string; score: number }) => {
+		mutationFn: async ({
+			entrantId,
+			score,
+			status
+		}: {
+			entrantId: string;
+			score: number;
+			status: Entrant['status'];
+		}) => {
 			const response = await fetch(`/api/tournaments/${stage.tournamentId}/entrants/${entrantId}`, {
 				method: 'PATCH',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ score })
+				body: JSON.stringify({ score, status })
 			});
 
 			const data = await response.json();
@@ -40,10 +49,10 @@
 			return data;
 		},
 
-		onSuccess: ({ entrant }) => {
+		onSuccess: ({ entrant }: { entrant: Entrant }) => {
 			stage.frontQueue().score = entrant.score;
-			// move front to back
-			stage.move(0, stage.queue.length - 1);
+			stage.frontQueue().status = entrant.status;
+			stage.move(0, stage.queue.length - 1); // move front to back
 		}
 	}));
 
@@ -71,7 +80,8 @@
 
 		await updateEntrantMutation.mutateAsync({
 			entrantId: front.id,
-			score: lead
+			score: lead,
+			status: 'scored'
 		});
 
 		await updateTournamentMutation.mutateAsync({
@@ -105,17 +115,12 @@
 
 	<StageCard {stage} />
 
-	<div
-		class="grid"
-		class:grid-cols-1={stage.isQualifying}
-		class:gap-0={stage.isQualifying}
-		class:gap-y-4={stage.isQualifying}
-		class:gap-4={!stage.isQualifying}
-		class:grid-cols-2={!stage.isQualifying}
-	>
+	<div class="grid grid-cols-2 gap-4">
 		{#if common}
 			{@const [, category] = common}
-			<CommoncriteriaCard {category} {judgement} isQualifying={stage.isQualifying} />
+			<div class:col-span-2={!stage.isQualifying}>
+				<CommoncriteriaCard {category} {judgement} isQualifying={stage.isQualifying} />
+			</div>
 		{/if}
 
 		{#if lead}
@@ -125,7 +130,7 @@
 
 		{#if chase && !stage.isQualifying}
 			{@const [, category] = chase}
-			<CriteriaCard {category} role="lead" {judgement} />
+			<CriteriaCard {category} role="chase" {judgement} />
 		{/if}
 	</div>
 
