@@ -8,7 +8,7 @@ export async function PATCH({ params, request }) {
 	const entrantId = params.entrantId;
 
 	if (!tournamentId || !entrantId) {
-		return json({ message: 'Tournament ID and qualifier ID are required.' }, { status: 400 });
+		return json({ message: 'Tournament ID and entrant ID are required.' }, { status: 400 });
 	}
 
 	const body = await request.json();
@@ -21,7 +21,7 @@ export async function PATCH({ params, request }) {
 		status !== 'not_qualified' &&
 		status !== 'pending'
 	) {
-		return json({ message: 'Invalid qualifier status.' }, { status: 400 });
+		return json({ message: 'Invalid entrant status.' }, { status: 400 });
 	}
 
 	if (score !== undefined && typeof score !== 'number') {
@@ -33,7 +33,7 @@ export async function PATCH({ params, request }) {
 	}
 
 	try {
-		const [updatedQualifier] = await db
+		const [updatedEntrant] = await db
 			.update(entrants)
 			.set({
 				...(status !== undefined && { status }),
@@ -42,12 +42,12 @@ export async function PATCH({ params, request }) {
 			.where(and(eq(entrants.id, entrantId), eq(entrants.tournamentId, tournamentId)))
 			.returning();
 
-		if (!updatedQualifier) {
-			return json({ message: 'Qualifier not found.' }, { status: 404 });
+		if (!updatedEntrant) {
+			return json({ message: 'Entrant not found.' }, { status: 404 });
 		}
 
 		return json({
-			qualifier: updatedQualifier
+			entrant: updatedEntrant
 		});
 	} catch (error) {
 		console.error('Failed to update qualifier:', error);

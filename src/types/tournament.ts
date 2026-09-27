@@ -1,4 +1,4 @@
-export type Entrants = {
+export type Entrant = {
 	id: string;
 	participantId: string;
 	name: string;

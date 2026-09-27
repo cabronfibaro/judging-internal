@@ -10,7 +10,8 @@
 	import { Button } from '$lib/components/ui/button';
 	import type { Stage } from '$lib/judging/stage.svelte';
 	import { createMutation } from '@tanstack/svelte-query';
-	import type { Entrants } from '../../../types/tournament';
+	import type { Entrant } from '../../../types/tournament';
+	import { updateTournament } from '$lib/api/tournaments';
 
 	let { stage }: { stage: Stage } = $props();
 
@@ -21,24 +22,7 @@
 		}: {
 			tournamentId: string;
 			qualifyingOrder: number[];
-		}) => {
-			const qualifyingOrderStr = qualifyingOrder.join(', ');
-			const response = await fetch(`/api/tournaments/${tournamentId}`, {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ qualifyingOrder: qualifyingOrderStr })
-			});
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				throw new Error(data.message ?? 'Failed to update tournament.');
-			}
-
-			return data;
-		}
+		}) => updateTournament(tournamentId, qualifyingOrder)
 	}));
 
 	function moveToFirst(idx: number) {
@@ -82,7 +66,7 @@
 		}
 	}));
 
-	function markAs(id: string, status: Entrants['status']) {
+	function markAs(id: string, status: Entrant['status']) {
 		updateQualifierMutation.mutate({
 			qualifierId: id,
 			status: status
@@ -112,7 +96,9 @@
 						</span>
 
 						{#if qualifier.status === 'pending'}
-							<Badge variant="secondary">{idx === 0 ? 'On Going' : 'Pending'}</Badge>
+							<Badge variant={idx === 0 ? 'default' : 'secondary'}>
+								{idx === 0 ? 'On Going' : 'Pending'}
+							</Badge>
 						{:else if qualifier.status === 'qualified'}
 							<Badge>Qualified</Badge>
 						{:else}

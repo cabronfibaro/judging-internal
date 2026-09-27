@@ -1,4 +1,4 @@
-import type { Entrants } from '../../types/tournament';
+import type { Entrant } from '../../types/tournament';
 
 type Driver = {
 	name: string;
@@ -32,7 +32,7 @@ class Stage {
 
 	onStage = $state(0);
 	orders = $state<number[]>([]);
-	queue = $state<Entrants[]>([]);
+	queue = $state<Entrant[]>([]);
 	isQualifying = $state(false);
 
 	state = $state(defaultValue);
@@ -41,13 +41,13 @@ class Stage {
 		this.state[driver][field] = value as never;
 	}
 
-	enqueueEntrants(entrants: Entrants[], orders: string) {
+	enqueueEntrants(entrants: Entrant[], orders: string) {
 		this.isQualifying = true;
 		this.orders = orders.split(', ').map((num) => Number(num));
 		this.queue = this.orders.map((index) => entrants[index]);
 	}
 
-	updateEntrants(entrant: Partial<Entrants> & { id: string }) {
+	updateEntrants(entrant: Partial<Entrant> & { id: string }) {
 		const existing = this.queue.find((q) => q.id === entrant.id);
 
 		if (!existing) {
@@ -59,10 +59,6 @@ class Stage {
 
 	frontQueue() {
 		return this.queue[0];
-	}
-
-	dequeue() {
-		this.queue.shift();
 	}
 
 	move(src: number, to: number) {

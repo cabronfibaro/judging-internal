@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { updateTournament } from '$lib/api/tournaments.js';
 	import CommoncriteriaCard from '$lib/components/judging/commoncriteria-card.svelte';
 	import CriteriaCard from '$lib/components/judging/criteria-card.svelte';
 	import DebugJudgement from '$lib/components/judging/debug-judgement.svelte';
@@ -10,8 +11,8 @@
 
 	import { Judgement } from '$lib/judging/judgement.svelte.js';
 	import { Stage } from '$lib/judging/stage.svelte.js';
+	import { createMutation } from '@tanstack/svelte-query';
 
-	// TODO: handle qualification mode by disabling the chase buttons
 	// TODO: add note for lead and chase
 
 	let { data } = $props();
@@ -20,7 +21,43 @@
 	let judgement = new Judgement();
 	let stage = new Stage();
 
-	function onSubmitJudgement() {
+	const updateEntrantMutation = createMutation(() => ({
+		mutationFn: async ({ entrantId, score }: { entrantId: string; score: number }) => {
+			const response = await fetch(`/api/tournaments/${stage.tournamentId}/entrants/${entrantId}`, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ score })
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message ?? 'Failed to update entrant score.');
+			}
+
+			return data;
+		},
+
+		onSuccess: ({ entrant }) => {
+			stage.frontQueue().score = entrant.score;
+			// move front to back
+			stage.move(0, stage.queue.length - 1);
+		}
+	}));
+
+	const updateTournamentMutation = createMutation(() => ({
+		mutationFn: async ({
+			tournamentId,
+			qualifyingOrder
+		}: {
+			tournamentId: string;
+			qualifyingOrder: number[];
+		}) => updateTournament(tournamentId, qualifyingOrder)
+	}));
+
+	async function onSubmitJudgement() {
 		const { lead, chase } = judgement.finalizedScore();
 		stage.setScore({ lead, chase });
 		judgement.clear();
@@ -29,6 +66,18 @@
 			handleBattle();
 			return;
 		}
+
+		const front = stage.frontQueue();
+
+		await updateEntrantMutation.mutateAsync({
+			entrantId: front.id,
+			score: lead
+		});
+
+		await updateTournamentMutation.mutateAsync({
+			tournamentId: stage.tournamentId,
+			qualifyingOrder: stage.orders
+		});
 	}
 
 	function handleBattle() {
