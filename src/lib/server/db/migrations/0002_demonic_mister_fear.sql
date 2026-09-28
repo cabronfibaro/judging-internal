@@ -1,0 +1,1 @@
+ALTER TABLE `tournaments` ADD `status` text DEFAULT 'qualifying' NOT NULL;

@@ -32,13 +32,40 @@ class Stage {
 
 	onStage = $state(0);
 	orders = $state<number[]>([]);
+
+	// TODO: make queue handle Entrant and the type of whatever to handle the battles
 	queue = $state<Entrant[]>([]);
 	isQualifying = $state(false);
 
 	state = $state(defaultValue);
 
+	clear(tournamentId = '') {
+		this.tournamentId = tournamentId;
+		this.orders = [];
+		this.queue = [];
+		this.isQualifying = false;
+		this.state = defaultValue;
+	}
+
 	updateDriver(driver: keyof State, field: keyof Driver, value: string | number) {
 		this.state[driver][field] = value as never;
+	}
+
+	frontQueue() {
+		return this.queue[0];
+	}
+
+	move(src: number, to: number) {
+		const [queueItem] = this.queue.splice(src, 1);
+		this.queue.splice(to, 0, queueItem);
+
+		const [orderItem] = this.orders.splice(src, 1);
+		this.orders.splice(to, 0, orderItem);
+	}
+
+	// <-- QUALIFYING BLOCK -->
+	isQualifyingComplete() {
+		return !this.queue.some((entrant) => entrant.status === 'pending');
 	}
 
 	enqueueEntrants(entrants: Entrant[], orders: string) {
@@ -56,18 +83,7 @@ class Stage {
 
 		Object.assign(existing, entrant);
 	}
-
-	frontQueue() {
-		return this.queue[0];
-	}
-
-	move(src: number, to: number) {
-		const [queueItem] = this.queue.splice(src, 1);
-		this.queue.splice(to, 0, queueItem);
-
-		const [orderItem] = this.orders.splice(src, 1);
-		this.orders.splice(to, 0, orderItem);
-	}
+	// <-- END OF QUALIFYING BLOCK -->
 
 	setScore({ lead, chase }: { lead: number; chase: number }) {
 		if (this.state.p1.state === 'lead') {
@@ -84,6 +100,7 @@ class Stage {
 		this.state.p2.state = this.state.p2.state === 'lead' ? 'chase' : 'lead';
 	}
 
+	// TODO: think about this later
 	isConcluded() {
 		return (
 			this.state.p1.lead_score !== -1 &&

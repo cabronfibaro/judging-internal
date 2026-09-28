@@ -38,6 +38,11 @@ export const tournaments = sqliteTable(
 		})
 			.notNull()
 			.default(true),
+		status: text('status', {
+			enum: ['qualifying', 'elimination']
+		})
+			.notNull()
+			.default('qualifying'),
 		...timestamps
 	},
 	(table) => [

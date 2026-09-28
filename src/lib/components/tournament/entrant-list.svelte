@@ -10,7 +10,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import type { Stage } from '$lib/judging/stage.svelte';
 	import { createMutation } from '@tanstack/svelte-query';
-	import type { Entrant } from '../../../types/tournament';
+	import type { Entrant, Tournament } from '../../../types/tournament';
 	import { updateTournament } from '$lib/api/tournaments';
 
 	let { stage }: { stage: Stage } = $props();
@@ -72,6 +72,30 @@
 			status: status
 		});
 	}
+	const concludeQualifiersMutation = createMutation(() => ({
+		mutationFn: async () => {
+			const response = await fetch(
+				`/api/tournaments/${stage.tournamentId}/entrants/concludeQualifiers`,
+				{
+					method: 'GET'
+				}
+			);
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message ?? 'Failed to conclude qualifiers.');
+			}
+
+			return data;
+		},
+
+		onSuccess: ({ tournament }: { tournament: Tournament }) => {
+			if (tournament.status === 'elimination') {
+				stage.clear(tournament.id);
+			}
+		}
+	}));
 </script>
 
 {#if stage.isQualifying}
@@ -143,5 +167,15 @@
 				</button>
 			{/each}
 		</div>
+		{#if stage.isQualifyingComplete()}
+			<Button
+				class="w-full"
+				variant="default"
+				onclick={() => concludeQualifiersMutation.mutate()}
+				disabled={concludeQualifiersMutation.isPending}
+			>
+				{concludeQualifiersMutation.isPending ? 'Concluding...' : 'Conclude'}
+			</Button>
+		{/if}
 	</div>
 {/if}

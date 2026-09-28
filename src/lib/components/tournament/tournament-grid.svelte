@@ -14,16 +14,9 @@
 	} from '$lib/components/ui/dialog';
 	import Skeleton from '../ui/skeleton/skeleton.svelte';
 	import type { Stage } from '$lib/judging/stage.svelte';
+	import type { Tournament } from '../../../types/tournament';
 
 	let { stage }: { stage: Stage } = $props();
-
-	type Tournament = {
-		id: string;
-		name: string;
-		startingDate: Date | string;
-		track: string | null;
-		qualifyingOrder: string;
-	};
 
 	const queryClient = useQueryClient();
 
@@ -49,7 +42,6 @@
 			});
 
 			const data = await response.json();
-
 			if (!response.ok) {
 				throw new Error(data.message ?? 'Failed to delete tournament.');
 			}
@@ -61,7 +53,6 @@
 			await queryClient.invalidateQueries({
 				queryKey: ['tournaments']
 			});
-
 			deleteDialogOpen = false;
 			selectedTournament = null;
 		}
@@ -112,13 +103,7 @@
 		});
 
 		stage.tournamentId = tournament.id;
-
-		const isQualifying = entrants.reduce(
-			(result, qualifier) => result || qualifier.status === 'pending',
-			false
-		);
-
-		if (isQualifying) {
+		if (tournament.status === 'qualifying') {
 			stage.enqueueEntrants(entrants, tournament.qualifyingOrder);
 		}
 
@@ -126,6 +111,7 @@
 	}
 </script>
 
+<!-- TODO: Should clear stage and tournament class after deleting a tournament -->
 <Dialog bind:open={deleteDialogOpen}>
 	<DialogContent>
 		<DialogHeader>
@@ -196,7 +182,11 @@
 		{#each tournamentsQuery.data as tournament (tournament.id)}
 			<Card>
 				<CardHeader>
-					<CardTitle>{tournament.name}</CardTitle>
+					<CardTitle
+						>{tournament.name} ({tournament.status === 'qualifying'
+							? 'Qualifying'
+							: 'Elimination'})</CardTitle
+					>
 				</CardHeader>
 
 				<CardContent class="space-y-4">

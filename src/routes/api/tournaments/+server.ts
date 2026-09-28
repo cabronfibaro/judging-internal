@@ -11,7 +11,9 @@ export async function GET() {
 				name: tournaments.name,
 				startingDate: tournaments.startingDate,
 				track: tracks.name,
-				qualifyingOrder: tournaments.qualifyingOrder
+				qualifyingOrder: tournaments.qualifyingOrder,
+				size: tournaments.size,
+				status: tournaments.status
 			})
 			.from(tournaments)
 			.leftJoin(tracks, eq(tournaments.trackId, tracks.id));
