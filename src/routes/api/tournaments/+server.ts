@@ -1,7 +1,9 @@
 import { json } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
-import { participants, entrants, tournaments, tracks } from '$lib/server/db/schema';
+import { CHALLONGE_API_KEY } from '$env/static/private';
+import { participants, entrants, tournaments, tracks, brackets } from '$lib/server/db/schema';
 import { db } from '$lib/server/db/client';
+import { snakeCase } from 'es-toolkit';
 
 export async function GET() {
 	try {
@@ -13,10 +15,12 @@ export async function GET() {
 				track: tracks.name,
 				qualifyingOrder: tournaments.qualifyingOrder,
 				size: tournaments.size,
-				status: tournaments.status
+				status: tournaments.status,
+				url: brackets.url
 			})
 			.from(tournaments)
-			.leftJoin(tracks, eq(tournaments.trackId, tracks.id));
+			.leftJoin(tracks, eq(tournaments.trackId, tracks.id))
+			.leftJoin(brackets, eq(tournaments.id, brackets.tournamentId));
 
 		return json({
 			tournaments: result
@@ -74,6 +78,65 @@ export async function POST({ request }) {
 	}
 
 	try {
+		const challongeResponse = await fetch('https://api.challonge.com/v2.1/tournaments.json', {
+			method: 'POST',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/vnd.api+json',
+				'Authorization-Type': 'v1',
+				Authorization: CHALLONGE_API_KEY
+			},
+			body: JSON.stringify({
+				data: {
+					type: 'tournaments',
+					attributes: {
+						name: tournamentName,
+						url: `${snakeCase(name)}_${Date.now()}`,
+						tournament_type: 'single elimination',
+						game_name: 'CarX Drift Racing', // TODO: make this configurable
+						private: false,
+						starts_at: date.toISOString(),
+						description: `Top ${size} head-to-head tandem battle knockout bracket.`,
+						match_options: {
+							consolation_matches_target_rank: 3,
+							accept_attachments: false
+						},
+						registration_options: {
+							open_signup: false
+						},
+						seeding_options: {
+							hide_seeds: false,
+							sequential_pairings: false // TODO: make this configurable also
+						},
+						station_options: {
+							auto_assign: false,
+							only_start_matches_with_assigned_stations: false
+						},
+						group_stage_enabled: false
+					}
+				}
+			})
+		});
+
+		const challongeData = await challongeResponse.json();
+
+		if (!challongeResponse.ok) {
+			console.error(
+				'Failed to create Challonge tournament:',
+				JSON.stringify(challongeData, null, 2)
+			);
+
+			return json(
+				{
+					message: 'Failed to create Challonge tournament.',
+					error: challongeData
+				},
+				{ status: challongeResponse.status }
+			);
+		}
+
+		const challongeUrl = challongeData.data.attributes.url;
+
 		const tournament = db.transaction((tx) => {
 			const existingTrack = tx
 				.select()
@@ -137,16 +200,17 @@ export async function POST({ request }) {
 			}
 
 			tx.insert(entrants).values(qualifierRows).run();
+			tx.insert(brackets)
+				.values({
+					tournamentId: createdTournament.id,
+					url: challongeUrl
+				})
+				.run();
 
 			return createdTournament;
 		});
 
-		return json(
-			{
-				tournament
-			},
-			{ status: 201 }
-		);
+		return json({ tournament }, { status: 201 });
 	} catch (error) {
 		console.error('Failed to create tournament:', error);
 

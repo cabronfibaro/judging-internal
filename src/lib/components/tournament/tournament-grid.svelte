@@ -24,13 +24,11 @@
 		queryKey: ['tournaments'],
 		queryFn: async (): Promise<Tournament[]> => {
 			const response = await fetch('/api/tournaments');
-
 			if (!response.ok) {
 				throw new Error('Failed to load tournaments.');
 			}
 
 			const data = await response.json();
-
 			return data.tournaments;
 		}
 	}));
@@ -73,8 +71,6 @@
 		deleteTournamentMutation.mutate(selectedTournament.id);
 	}
 
-	let selectedTournamentId = $state<string | null>(null);
-
 	type Qualifier = {
 		id: string;
 		participantId: string;
@@ -106,8 +102,6 @@
 		if (tournament.status === 'qualifying') {
 			stage.enqueueEntrants(entrants, tournament.qualifyingOrder);
 		}
-
-		selectedTournamentId = tournament.id;
 	}
 </script>
 
@@ -201,6 +195,18 @@
 						<p>
 							<span class="text-muted-foreground">Starting:</span>
 							{new Date(tournament.startingDate).toLocaleString()}
+						</p>
+
+						<p>
+							<span class="text-muted-foreground">Bracket:</span>
+							<a
+								href={`https://challonge.com/${tournament.url}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="text-primary underline underline-offset-4 hover:text-primary/80"
+							>
+								Link
+							</a>
 						</p>
 					</div>
 

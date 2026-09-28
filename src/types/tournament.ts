@@ -5,6 +5,7 @@ export type Tournament = {
 	track: string | null;
 	qualifyingOrder: string;
 	status: 'qualifying' | 'elimination';
+	url: string;
 };
 
 export type Entrant = {

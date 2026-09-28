@@ -84,3 +84,16 @@ export const entrants = sqliteTable('entrants', {
 	score: real('score').notNull().default(0),
 	...timestamps
 });
+
+export const brackets = sqliteTable('brackets', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => nanoid(15)),
+	tournamentId: text('tournament_id')
+		.notNull()
+		.references(() => tournaments.id, {
+			onDelete: 'cascade'
+		}),
+	url: text('url').notNull(),
+	...timestamps
+});

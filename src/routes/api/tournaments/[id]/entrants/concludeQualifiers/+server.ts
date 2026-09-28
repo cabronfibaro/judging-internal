@@ -1,7 +1,8 @@
 import { db } from '$lib/server/db/client';
-import { entrants, tournaments } from '$lib/server/db/schema';
+import { entrants, tournaments, participants, brackets } from '$lib/server/db/schema';
 import { json } from '@sveltejs/kit';
-import { and, eq } from 'drizzle-orm';
+import { CHALLONGE_API_KEY } from '$env/static/private';
+import { and, eq, inArray } from 'drizzle-orm';
 
 export async function GET({ params }) {
 	const tournamentId = params.id;
@@ -11,36 +12,97 @@ export async function GET({ params }) {
 	}
 
 	try {
+		const tournament = db
+			.select({
+				size: tournaments.size,
+				challongeTournamentId: brackets.url
+			})
+			.from(tournaments)
+			.leftJoin(brackets, eq(tournaments.id, brackets.tournamentId))
+			.where(eq(tournaments.id, tournamentId))
+			.limit(1)
+			.all()[0];
+
+		if (!tournament) {
+			return json({ message: 'Tournament not found.' }, { status: 404 });
+		}
+
+		const tournamentEntrants = db
+			.select({
+				id: entrants.id,
+				tournamentId: entrants.tournamentId,
+				participantId: entrants.participantId,
+				status: entrants.status,
+				score: entrants.score,
+				name: participants.name
+			})
+			.from(entrants)
+			.leftJoin(participants, eq(entrants.participantId, participants.id))
+			.where(eq(entrants.tournamentId, tournamentId))
+			.all();
+
+		const sorted = tournamentEntrants.sort((a, b) => b.score - a.score);
+		const qualifiedEntrants = sorted.slice(0, tournament.size);
+		const qualifiedIds = qualifiedEntrants.map((entrant) => entrant.id);
+
+		const challongeResponse = await fetch(
+			`https://api.challonge.com/v2.1/tournaments/${tournament.challongeTournamentId}/participants/bulk_add.json`,
+			{
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/vnd.api+json',
+					'Authorization-Type': 'v1',
+					Authorization: CHALLONGE_API_KEY
+				},
+				body: JSON.stringify({
+					data: {
+						type: 'Participants',
+						attributes: {
+							participants: qualifiedEntrants.map((entrant) => ({
+								name: entrant.name
+							}))
+						}
+					}
+				})
+			}
+		);
+
+		const challongeData = await challongeResponse.json();
+
+		if (!challongeResponse.ok) {
+			console.error(
+				'Failed to add participants to Challonge:',
+				JSON.stringify(challongeData, null, 2)
+			);
+
+			return json(
+				{
+					message: 'Failed to create Challonge participants.',
+					error: challongeData
+				},
+				{ status: challongeResponse.status }
+			);
+		}
+
 		let updatedTournament;
 
 		db.transaction((tx) => {
-			const [tournament] = tx
-				.select({
-					size: tournaments.size
+			tx.update(entrants)
+				.set({
+					status: 'not_qualified',
+					updatedAt: new Date()
 				})
-				.from(tournaments)
-				.where(eq(tournaments.id, tournamentId))
-				.all();
-
-			if (!tournament) {
-				throw new Error('Tournament not found.');
-			}
-
-			const tournamentEntrants = tx
-				.select()
-				.from(entrants)
 				.where(eq(entrants.tournamentId, tournamentId))
-				.all();
+				.run();
 
-			const sorted = tournamentEntrants.sort((a, b) => b.score - a.score);
-
-			for (const [index, entrant] of sorted.entries()) {
+			if (qualifiedIds.length > 0) {
 				tx.update(entrants)
 					.set({
-						status: index < tournament.size ? 'qualified' : 'not_qualified',
+						status: 'qualified',
 						updatedAt: new Date()
 					})
-					.where(and(eq(entrants.id, entrant.id), eq(entrants.tournamentId, tournamentId)))
+					.where(and(eq(entrants.tournamentId, tournamentId), inArray(entrants.id, qualifiedIds)))
 					.run();
 			}
 

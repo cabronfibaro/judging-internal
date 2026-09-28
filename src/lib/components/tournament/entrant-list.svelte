@@ -12,6 +12,15 @@
 	import { createMutation } from '@tanstack/svelte-query';
 	import type { Entrant, Tournament } from '../../../types/tournament';
 	import { updateTournament } from '$lib/api/tournaments';
+	import AlertDialog from '../ui/alert-dialog/alert-dialog.svelte';
+	import AlertDialogTrigger from '../ui/alert-dialog/alert-dialog-trigger.svelte';
+	import AlertDialogContent from '../ui/alert-dialog/alert-dialog-content.svelte';
+	import AlertDialogHeader from '../ui/alert-dialog/alert-dialog-header.svelte';
+	import AlertDialogTitle from '../ui/alert-dialog/alert-dialog-title.svelte';
+	import AlertDialogDescription from '../ui/alert-dialog/alert-dialog-description.svelte';
+	import AlertDialogFooter from '../ui/alert-dialog/alert-dialog-footer.svelte';
+	import AlertDialogCancel from '../ui/alert-dialog/alert-dialog-cancel.svelte';
+	import AlertDialogAction from '../ui/alert-dialog/alert-dialog-action.svelte';
 
 	let { stage }: { stage: Stage } = $props();
 
@@ -168,14 +177,35 @@
 			{/each}
 		</div>
 		{#if stage.isQualifyingComplete()}
-			<Button
-				class="w-full"
-				variant="default"
-				onclick={() => concludeQualifiersMutation.mutate()}
-				disabled={concludeQualifiersMutation.isPending}
-			>
-				{concludeQualifiersMutation.isPending ? 'Concluding...' : 'Conclude'}
-			</Button>
+			<AlertDialog>
+				<AlertDialogTrigger class="w-full">
+					<Button class="w-full" variant="default" disabled={concludeQualifiersMutation.isPending}>
+						Conclude
+					</Button>
+				</AlertDialogTrigger>
+
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Conclude qualifying?</AlertDialogTitle>
+
+						<AlertDialogDescription>
+							After concluding qualifying, the qualified entrants will be finalized and will be
+							seeded to the tournament bracket. This action cannot be undone.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+
+						<AlertDialogAction
+							onclick={() => concludeQualifiersMutation.mutate()}
+							disabled={concludeQualifiersMutation.isPending}
+						>
+							{concludeQualifiersMutation.isPending ? 'Concluding...' : 'Conclude'}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		{/if}
 	</div>
 {/if}
