@@ -29,7 +29,14 @@ export async function GET() {
 export async function POST({ request }) {
 	const body = await request.json();
 
-	const { name, startingDate, track, entrants: entrantsNames } = body;
+	const {
+		name,
+		size,
+		startingDate,
+		track,
+		entrants: entrantsNames,
+		randomizeQualifyingOrder
+	} = body;
 
 	if (
 		typeof name !== 'string' ||
@@ -91,7 +98,9 @@ export async function POST({ request }) {
 					name: tournamentName,
 					startingDate: date,
 					trackId: trackRow.id,
-					qualifyingOrder: qualifyingOrder.join(', ')
+					qualifyingOrder: qualifyingOrder.join(', '),
+					size,
+					randomizeQualifyingOrder
 				})
 				.returning()
 				.all();

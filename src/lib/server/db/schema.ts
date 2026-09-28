@@ -1,4 +1,5 @@
-import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
+import { integer, real, sqliteTable, text, check } from 'drizzle-orm/sqlite-core';
 import { nanoid } from 'nanoid';
 
 const timestamps = {
@@ -19,19 +20,30 @@ export const tracks = sqliteTable('tracks', {
 	...timestamps
 });
 
-// TODO: should have option to randomize qualifying order or not
-export const tournaments = sqliteTable('tournaments', {
-	id: text('id')
-		.primaryKey()
-		.$defaultFn(() => nanoid(15)),
-	name: text('name').notNull(),
-	startingDate: integer('starting_date', { mode: 'timestamp' }).notNull(),
-	trackId: text('track_id')
-		.notNull()
-		.references(() => tracks.id),
-	qualifyingOrder: text('qualifying_order').notNull(),
-	...timestamps
-});
+export const tournaments = sqliteTable(
+	'tournaments',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => nanoid(15)),
+		name: text('name').notNull(),
+		size: integer('size').notNull(),
+		startingDate: integer('starting_date', { mode: 'timestamp' }).notNull(),
+		trackId: text('track_id')
+			.notNull()
+			.references(() => tracks.id),
+		qualifyingOrder: text('qualifying_order').notNull(),
+		randomizeQualifyingOrder: integer('randomize_qualifying_order', {
+			mode: 'boolean'
+		})
+			.notNull()
+			.default(true),
+		...timestamps
+	},
+	(table) => [
+		check('size_power_of_2', sql`${table.size} > 0 AND (${table.size} & (${table.size} - 1)) = 0`)
+	]
+);
 
 export const participants = sqliteTable('participants', {
 	id: text('id')

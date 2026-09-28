@@ -14,28 +14,35 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import Switch from '../ui/switch/switch.svelte';
 
 	let open = $state(false);
 	let error = $state('');
 
 	let name = $state('');
+	let size = $state(2);
 	let startingDate = $state('');
 	let trackName = $state('');
 	let entrantNames = $state('');
+	let randomizeQualifyingOrder = $state(true);
 
 	const queryClient = useQueryClient();
 
 	const createTournamentMutation = createMutation(() => ({
 		mutationFn: async ({
 			name,
+			size,
 			startingDate,
 			track,
-			entrants
+			entrants,
+			randomizeQualifyingOrder
 		}: {
 			name: string;
+			size: number;
 			startingDate: string;
 			track: string;
 			entrants: string[];
+			randomizeQualifyingOrder: boolean;
 		}) => {
 			const response = await fetch('/api/tournaments', {
 				method: 'POST',
@@ -44,9 +51,11 @@
 				},
 				body: JSON.stringify({
 					name,
+					size,
 					startingDate,
 					track,
-					entrants
+					entrants,
+					randomizeQualifyingOrder
 				})
 			});
 
@@ -104,9 +113,11 @@
 
 		await createTournamentMutation.mutateAsync({
 			name: name.trim(),
+			size,
 			startingDate,
 			track: trackName.trim(),
-			entrants
+			entrants,
+			randomizeQualifyingOrder
 		});
 	}
 </script>
@@ -128,8 +139,18 @@
 		<div class="space-y-4">
 			<div class="space-y-2">
 				<Label for="name">Tournament name</Label>
-
 				<Input id="name" placeholder="Summer Drift Championship" bind:value={name} />
+			</div>
+
+			<div class="space-y-2">
+				<Label for="name">Size</Label>
+				<Input
+					type="number"
+					min="2"
+					id="size"
+					placeholder="Size of the bracket"
+					bind:value={size}
+				/>
 			</div>
 
 			<div class="space-y-2">
@@ -156,6 +177,13 @@
 				/>
 
 				<p class="text-sm text-muted-foreground">Enter one participant name per line.</p>
+			</div>
+
+			<div class="flex items-center justify-between space-y-3">
+				<div class="flex h-6 items-center justify-between">
+					<Label>Randomize Qualifying Order</Label>
+				</div>
+				<Switch bind:checked={randomizeQualifyingOrder} />
 			</div>
 
 			{#if error}
