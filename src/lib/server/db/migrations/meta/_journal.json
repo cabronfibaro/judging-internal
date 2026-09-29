@@ -43,6 +43,13 @@
       "when": 1790656320828,
       "tag": "0005_tricky_maggott",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1790674307669,
+      "tag": "0006_lonely_talon",
+      "breakpoints": true
     }
   ]
 }

@@ -34,7 +34,8 @@ export async function GET({ params }) {
 				participantId: entrants.participantId,
 				status: entrants.status,
 				score: entrants.score,
-				name: participants.name
+				name: participants.name,
+				challongeParticipantId: participants.challongeParticipantId
 			})
 			.from(entrants)
 			.leftJoin(participants, eq(entrants.participantId, participants.id))
@@ -85,6 +86,13 @@ export async function GET({ params }) {
 			);
 		}
 
+		const { data } = challongeData;
+
+		const challongeIdsByName: Record<string, string> = {};
+		for (const participant of data) {
+			challongeIdsByName[participant.attributes.name] = participant.id;
+		}
+
 		let updatedTournament;
 
 		db.transaction((tx) => {
@@ -103,6 +111,27 @@ export async function GET({ params }) {
 						updatedAt: new Date()
 					})
 					.where(and(eq(entrants.tournamentId, tournamentId), inArray(entrants.id, qualifiedIds)))
+					.run();
+			}
+
+			for (const entrant of qualifiedEntrants) {
+				const challongeParticipantId = challongeIdsByName[entrant.name!];
+
+				if (!challongeParticipantId) {
+					throw new Error(`Challonge participant not found: ${entrant.name}`);
+				}
+
+				tx.update(participants)
+					.set({
+						challongeParticipantId,
+						updatedAt: new Date()
+					})
+					.where(
+						and(
+							eq(participants.id, entrant.participantId),
+							eq(participants.tournamentId, tournamentId)
+						)
+					)
 					.run();
 			}
 

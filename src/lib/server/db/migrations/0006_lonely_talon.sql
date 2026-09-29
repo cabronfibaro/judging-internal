@@ -1,0 +1,1 @@
+ALTER TABLE `participants` ADD `challonge_participant_id` text;

@@ -55,6 +55,7 @@ export const participants = sqliteTable('participants', {
 		.primaryKey()
 		.$defaultFn(() => nanoid(15)),
 	name: text('name').notNull(),
+	challongeParticipantId: text('challonge_participant_id'), // NULLABLE
 	tournamentId: text('tournament_id')
 		.notNull()
 		.references(() => tournaments.id, {
