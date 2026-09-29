@@ -5,50 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1790514906810,
-      "tag": "0000_rainy_naoko",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1790571899508,
-      "tag": "0001_nebulous_gamora",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1790575118287,
-      "tag": "0002_demonic_mister_fear",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1790584990582,
-      "tag": "0003_fat_owl",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1790655448561,
-      "tag": "0004_abnormal_darwin",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1790656320828,
-      "tag": "0005_tricky_maggott",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1790674307669,
-      "tag": "0006_lonely_talon",
+      "when": 1790684191378,
+      "tag": "0000_unique_corsair",
       "breakpoints": true
     }
   ]

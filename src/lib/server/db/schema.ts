@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { integer, real, sqliteTable, text, check } from 'drizzle-orm/sqlite-core';
+import { integer, real, sqliteTable, text, check, int } from 'drizzle-orm/sqlite-core';
 import { nanoid } from 'nanoid';
 
 const timestamps = {
@@ -101,4 +101,21 @@ export const brackets = sqliteTable('brackets', {
 		.notNull()
 		.default('not_started'),
 	...timestamps
+});
+
+export const nodes = sqliteTable('nodes', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => nanoid(15)),
+	bracketId: text('bracket_id')
+		.notNull()
+		.references(() => brackets.id, {
+			onDelete: 'cascade'
+		}),
+	participantId: text('participant_id').references(() => participants.id, {
+		onDelete: 'cascade'
+	}),
+	matchId: text('match_id').notNull(),
+	status: text('status', { enum: ['pending', 'open'] }).notNull(),
+	round: int('round').notNull()
 });

@@ -100,5 +100,11 @@ export async function startTournament(tournamentId: string) {
 		throw new Error(data.message ?? 'Failed to start tournament.');
 	}
 
+	const bracketSyncResponse = await fetch(`/api/tournaments/${tournamentId}/bracket/sync`);
+	const syncData = await bracketSyncResponse.json();
+	if (!bracketSyncResponse.ok) {
+		throw new Error(syncData.message ?? 'Failed to start tournament.');
+	}
+
 	return data;
 }

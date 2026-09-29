@@ -81,6 +81,9 @@
 			status: status
 		});
 	}
+
+	// FIXME: after done concluding a qualifiers, when we hit load, it loads qualified entrants in
+	// qualifying mode
 	const concludeQualifiersMutation = createMutation(() => ({
 		mutationFn: async () => {
 			const response = await fetch(

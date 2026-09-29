@@ -1,1 +1,0 @@
-ALTER TABLE `brackets` ADD `status` text DEFAULT 'not_started' NOT NULL;
