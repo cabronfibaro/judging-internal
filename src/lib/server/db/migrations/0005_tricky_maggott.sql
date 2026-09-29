@@ -1,0 +1,1 @@
+ALTER TABLE `brackets` ADD `challonge_id` text NOT NULL;

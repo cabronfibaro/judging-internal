@@ -63,7 +63,7 @@
 		}: {
 			tournamentId: string;
 			qualifyingOrder: number[];
-		}) => updateTournament(tournamentId, qualifyingOrder)
+		}) => updateTournament(tournamentId, { qualifyingOrder: qualifyingOrder.join(', ') })
 	}));
 
 	async function onSubmitJudgement() {

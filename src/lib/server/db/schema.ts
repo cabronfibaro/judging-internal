@@ -94,6 +94,10 @@ export const brackets = sqliteTable('brackets', {
 		.references(() => tournaments.id, {
 			onDelete: 'cascade'
 		}),
+	challongeId: text('challonge_id').notNull(),
 	url: text('url').notNull(),
+	status: text('status', { enum: ['not_started', 'started'] })
+		.notNull()
+		.default('not_started'),
 	...timestamps
 });

@@ -15,6 +15,7 @@
 	import Skeleton from '../ui/skeleton/skeleton.svelte';
 	import type { Stage } from '$lib/judging/stage.svelte';
 	import type { Tournament } from '../../../types/tournament';
+	import { deleteTournament, getEntrants, startTournament } from '$lib/api/tournaments';
 
 	let { stage }: { stage: Stage } = $props();
 
@@ -34,19 +35,7 @@
 	}));
 
 	const deleteTournamentMutation = createMutation(() => ({
-		mutationFn: async (id: string) => {
-			const response = await fetch(`/api/tournaments/${id}`, {
-				method: 'DELETE'
-			});
-
-			const data = await response.json();
-			if (!response.ok) {
-				throw new Error(data.message ?? 'Failed to delete tournament.');
-			}
-
-			return data;
-		},
-
+		mutationFn: async (id: string) => deleteTournament(id),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({
 				queryKey: ['tournaments']
@@ -65,43 +54,27 @@
 		deleteDialogOpen = true;
 	}
 
-	function deleteTournament() {
+	function onDeleteTournament() {
 		if (!selectedTournament) return;
-
 		deleteTournamentMutation.mutate(selectedTournament.id);
-	}
-
-	type Qualifier = {
-		id: string;
-		participantId: string;
-		name: string;
-		status: 'qualified' | 'not_qualified' | 'pending';
-		score: number;
-	};
-
-	async function fetchEntrants(tournamentId: string): Promise<Qualifier[]> {
-		const response = await fetch(`/api/tournaments/${tournamentId}/entrants`);
-
-		if (!response.ok) {
-			throw new Error('Failed to load entrants.');
-		}
-
-		const data = await response.json();
-
-		return data.entrants;
 	}
 
 	// TODO: SHOW TOAST AFTER LOAD
 	async function onLoadTournament(tournament: Tournament) {
 		const entrants = await queryClient.query({
 			queryKey: ['tournament-entrants', tournament.id],
-			queryFn: () => fetchEntrants(tournament.id)
+			queryFn: () => getEntrants(tournament.id)
 		});
 
 		stage.tournamentId = tournament.id;
+
 		if (tournament.status === 'qualifying') {
 			stage.enqueueEntrants(entrants, tournament.qualifyingOrder);
+			return;
 		}
+
+		// TODO: not so sure about starting on load button, think about this
+		await startTournament(tournament.id);
 	}
 </script>
 
@@ -136,7 +109,7 @@
 			<Button
 				variant="destructive"
 				disabled={deleteTournamentMutation.isPending}
-				onclick={deleteTournament}
+				onclick={onDeleteTournament}
 			>
 				{deleteTournamentMutation.isPending ? 'Deleting...' : 'Delete'}
 			</Button>

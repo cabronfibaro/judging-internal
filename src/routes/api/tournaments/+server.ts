@@ -136,6 +136,7 @@ export async function POST({ request }) {
 		}
 
 		const challongeUrl = challongeData.data.attributes.url;
+		const challongeId = challongeData.data.id;
 
 		const tournament = db.transaction((tx) => {
 			const existingTrack = tx
@@ -203,7 +204,8 @@ export async function POST({ request }) {
 			tx.insert(brackets)
 				.values({
 					tournamentId: createdTournament.id,
-					url: challongeUrl
+					url: challongeUrl,
+					challongeId: challongeId
 				})
 				.run();
 

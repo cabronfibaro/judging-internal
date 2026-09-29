@@ -31,7 +31,7 @@
 		}: {
 			tournamentId: string;
 			qualifyingOrder: number[];
-		}) => updateTournament(tournamentId, qualifyingOrder)
+		}) => updateTournament(tournamentId, { qualifyingOrder: qualifyingOrder.join(', ') })
 	}));
 
 	function moveToFirst(idx: number) {
