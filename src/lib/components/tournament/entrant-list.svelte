@@ -10,8 +10,8 @@
 	import { Button } from '$lib/components/ui/button';
 	import type { Stage } from '$lib/judging/stage.svelte';
 	import { createMutation } from '@tanstack/svelte-query';
-	import type { Entrant, Tournament } from '../../../types/tournament';
-	import { updateTournament } from '$lib/api/tournaments';
+	import type { Entrant, GroupedMatches, Tournament } from '../../../types/tournament';
+	import { syncTournament, updateTournament } from '$lib/api/tournaments';
 	import AlertDialog from '../ui/alert-dialog/alert-dialog.svelte';
 	import AlertDialogTrigger from '../ui/alert-dialog/alert-dialog-trigger.svelte';
 	import AlertDialogContent from '../ui/alert-dialog/alert-dialog-content.svelte';
@@ -22,7 +22,8 @@
 	import AlertDialogCancel from '../ui/alert-dialog/alert-dialog-cancel.svelte';
 	import AlertDialogAction from '../ui/alert-dialog/alert-dialog-action.svelte';
 
-	let { stage }: { stage: Stage } = $props();
+	// eslint-disable-next-line no-useless-assignment
+	let { stage, matches = $bindable() }: { stage: Stage; matches: GroupedMatches } = $props();
 
 	const updateTournamentMutation = createMutation(() => ({
 		mutationFn: async ({
@@ -82,8 +83,6 @@
 		});
 	}
 
-	// FIXME: after done concluding a qualifiers, when we hit load, it loads qualified entrants in
-	// qualifying mode
 	const concludeQualifiersMutation = createMutation(() => ({
 		mutationFn: async () => {
 			const response = await fetch(
@@ -102,9 +101,10 @@
 			return data;
 		},
 
-		onSuccess: ({ tournament }: { tournament: Tournament }) => {
+		onSuccess: async ({ tournament }: { tournament: Tournament }) => {
 			if (tournament.status === 'elimination') {
 				stage.clear(tournament.id);
+				matches = await syncTournament(fetch, tournament.id);
 			}
 		}
 	}));

@@ -66,11 +66,14 @@ export async function POST({ params, request }) {
 		const challongeData = await challongeResponse.json();
 
 		if (!challongeResponse.ok) {
-			console.error('Failed to start the tournament', JSON.stringify(challongeData, null, 2));
+			console.error(
+				'Failed to change the tournament state',
+				JSON.stringify(challongeData, null, 2)
+			);
 
 			return json(
 				{
-					message: 'Failed to start the tournament',
+					message: 'Failed to change the tournament state',
 					error: challongeData
 				},
 				{ status: challongeResponse.status }

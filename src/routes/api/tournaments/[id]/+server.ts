@@ -22,7 +22,7 @@ export async function GET({ params }) {
 			return json({ message: 'Tournament not found.' }, { status: 404 });
 		}
 
-		return json({ tournament });
+		return json(tournament);
 	} catch (error) {
 		console.error('Failed to get tournament:', error);
 		return json({ message: 'Failed to get tournament.' }, { status: 500 });

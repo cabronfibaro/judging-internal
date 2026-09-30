@@ -27,13 +27,13 @@ export async function GET({ params }) {
 			.all();
 
 		const rounds = Object.groupBy(rows, ({ round }) => round);
-		const matches = Object.values(rounds).map((round) => {
+		const groupedMatches = Object.values(rounds).map((round) => {
 			if (!round) return [];
 			return Object.values(Object.groupBy(round, ({ matchId }) => matchId));
 		});
 
 		return json({
-			matches
+			matches: groupedMatches
 		});
 	} catch (error) {
 		console.error('Failed to get bracket matches:', error);
