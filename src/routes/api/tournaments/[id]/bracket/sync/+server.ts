@@ -44,7 +44,6 @@ export async function GET({ params }) {
 
 		if (!response.ok) {
 			console.error('Failed to fetch Challonge matches:', JSON.stringify(data, null, 2));
-
 			return json(
 				{
 					message: 'Failed to fetch Challonge matches.',
@@ -84,9 +83,21 @@ export async function GET({ params }) {
 			localParticipants.map((participant) => [participant.challongeParticipantId, participant.id])
 		);
 
+		const matchIds = matches.map((match: any) => match.id);
+
+		const existingNodes = db
+			.select()
+			.from(nodes)
+			.where(and(eq(nodes.bracketId, bracket.id), inArray(nodes.matchId, matchIds)))
+			.all();
+
+		const nodeMap = new Map(
+			existingNodes.map((node) => [`${node.matchId}:${node.participantId}`, node])
+		);
+
 		db.transaction((tx) => {
 			for (const match of matches) {
-				const { state, round, points_by_participant } = match.attributes;
+				const { state, round, points_by_participant, winner_id } = match.attributes;
 
 				for (const entry of points_by_participant) {
 					const participantId = entry.participant_id
@@ -99,15 +110,31 @@ export async function GET({ params }) {
 						);
 					}
 
-					tx.insert(nodes)
-						.values({
-							bracketId: bracket.id,
-							participantId,
-							matchId: match.id,
-							status: state === 'open' ? 'open' : 'pending',
-							round
-						})
-						.run();
+					const key = `${match.id}:${participantId}`;
+					const existingNode = nodeMap.get(key);
+
+					const values = {
+						bracketId: bracket.id,
+						participantId,
+						matchId: match.id,
+						status: state,
+						round,
+						winnerId: winner_id != null ? String(winner_id) : null
+					};
+
+					if (existingNode) {
+						tx.update(nodes)
+							.set({
+								participantId: values.participantId,
+								status: values.status,
+								round: values.round,
+								winnerId: values.winnerId
+							})
+							.where(eq(nodes.id, existingNode.id))
+							.run();
+					} else {
+						tx.insert(nodes).values(values).run();
+					}
 				}
 			}
 		});
