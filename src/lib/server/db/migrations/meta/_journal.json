@@ -8,6 +8,13 @@
       "when": 1790684191378,
       "tag": "0000_unique_corsair",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1790745070228,
+      "tag": "0001_nappy_infant_terrible",
+      "breakpoints": true
     }
   ]
 }

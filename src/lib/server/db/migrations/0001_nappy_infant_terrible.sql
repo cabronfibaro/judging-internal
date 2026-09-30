@@ -1,0 +1,1 @@
+ALTER TABLE `nodes` ADD `winner_id` text;

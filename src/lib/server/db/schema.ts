@@ -116,6 +116,7 @@ export const nodes = sqliteTable('nodes', {
 		onDelete: 'cascade'
 	}),
 	matchId: text('match_id').notNull(),
+	winnerId: text('winner_id'), // CHALLONGE PARTICIPANT ID
 	status: text('status', { enum: ['pending', 'open'] }).notNull(),
 	round: int('round').notNull()
 });
