@@ -14,10 +14,17 @@
 	} from '$lib/components/ui/dialog';
 	import Skeleton from '../ui/skeleton/skeleton.svelte';
 	import type { Stage } from '$lib/judging/stage.svelte';
-	import type { Tournament } from '../../../types/tournament';
-	import { deleteTournament, getEntrants, startTournament } from '$lib/api/tournaments';
+	import type { GroupedMatches, Tournament } from '../../../types/tournament';
+	import { deleteTournament, getEntrants, syncTournament } from '$lib/api/tournaments';
 
-	let { stage }: { stage: Stage } = $props();
+	let {
+		stage,
+		// eslint-disable-next-line no-useless-assignment
+		matches = $bindable<GroupedMatches>([])
+	}: {
+		stage: Stage;
+		matches: GroupedMatches;
+	} = $props();
 
 	const queryClient = useQueryClient();
 
@@ -73,8 +80,7 @@
 			return;
 		}
 
-		// TODO: not so sure about starting on load button, think about this
-		await startTournament(tournament.id);
+		matches = await syncTournament(tournament.id);
 	}
 </script>
 

@@ -1,4 +1,4 @@
-import type { Entrant, Tournament } from '../../types/tournament';
+import type { Entrant, GroupedMatches, Tournament } from '../../types/tournament';
 
 export async function getEntrants(tournamentId: string): Promise<Entrant[]> {
 	const response = await fetch(`/api/tournaments/${tournamentId}/entrants`);
@@ -72,7 +72,7 @@ export async function deleteTournament(tournamentId: string) {
 	return data;
 }
 
-export async function startTournament(tournamentId: string) {
+export async function syncTournament(tournamentId: string) {
 	const bracketResponse = await fetch(`/api/tournaments/${tournamentId}/bracket`);
 	const bracketData = await bracketResponse.json();
 
@@ -80,31 +80,29 @@ export async function startTournament(tournamentId: string) {
 		throw new Error(bracketData.message ?? 'Failed to get tournament bracket.');
 	}
 
-	if (bracketData.bracket.status === 'started') {
-		console.info('tournament has already been started');
-		return;
-	}
+	// should start tournamnet if status is not yet started
+	if (bracketData.bracket.status !== 'started') {
+		const response = await fetch(`/api/tournaments/${tournamentId}/state`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				state: 'start'
+			})
+		});
 
-	const response = await fetch(`/api/tournaments/${tournamentId}/state`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			state: 'start'
-		})
-	});
-
-	const data = await response.json();
-	if (!response.ok) {
-		throw new Error(data.message ?? 'Failed to start tournament.');
+		const data = await response.json();
+		if (!response.ok) {
+			throw new Error(data.message ?? 'Failed to start tournament.');
+		}
 	}
 
 	const bracketSyncResponse = await fetch(`/api/tournaments/${tournamentId}/bracket/sync`);
-	const syncData = await bracketSyncResponse.json();
+	const response = await bracketSyncResponse.json();
 	if (!bracketSyncResponse.ok) {
-		throw new Error(syncData.message ?? 'Failed to start tournament.');
+		throw new Error(response.message ?? 'Failed to start tournament.');
 	}
 
-	return data;
+	return response.matches as GroupedMatches;
 }

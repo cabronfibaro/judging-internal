@@ -12,7 +12,7 @@
 	import { Judgement } from '$lib/judging/judgement.svelte.js';
 	import { Stage } from '$lib/judging/stage.svelte.js';
 	import { createMutation } from '@tanstack/svelte-query';
-	import type { Entrant } from '../types/tournament.js';
+	import type { Entrant, GroupedMatches } from '../types/tournament.js';
 
 	// TODO: add note for lead and chase
 
@@ -103,17 +103,23 @@
 	let common = $derived(categories.find(([id]) => id === 'common'));
 	let lead = $derived(categories.find(([id]) => id === 'lead'));
 	let chase = $derived(categories.find(([id]) => id === 'chase'));
+
+	let matches = $state<GroupedMatches>([]);
+
+	$effect(() => {
+		console.log(matches);
+	});
 </script>
 
 <div class="mx-auto max-w-4xl space-y-4 p-6">
 	<TournamentDialog />
-	<TournamentGrid {stage} />
+	<TournamentGrid {stage} bind:matches />
 	<div>
 		<h1 class="text-2xl font-bold">Using: {criteriaConfig.name} config</h1>
 		<p class="text-muted-foreground">Lorem ipsum jembut delemut</p>
 	</div>
 
-	<StageCard {stage} />
+	<StageCard {stage} bind:matches />
 
 	<div class="grid grid-cols-2 gap-4">
 		{#if common}

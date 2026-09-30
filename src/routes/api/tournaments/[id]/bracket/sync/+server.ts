@@ -91,9 +91,7 @@ export async function GET({ params }) {
 			.where(and(eq(nodes.bracketId, bracket.id), inArray(nodes.matchId, matchIds)))
 			.all();
 
-		const nodeMap = new Map(
-			existingNodes.map((node) => [`${node.matchId}:${node.participantId}`, node])
-		);
+		const nodeMap = new Map(existingNodes.map((node) => [node.matchId, node]));
 
 		db.transaction((tx) => {
 			for (const match of matches) {
@@ -110,8 +108,7 @@ export async function GET({ params }) {
 						);
 					}
 
-					const key = `${match.id}:${participantId}`;
-					const existingNode = nodeMap.get(key);
+					const existingNode = nodeMap.get(match.id);
 
 					const values = {
 						bracketId: bracket.id,
@@ -139,8 +136,29 @@ export async function GET({ params }) {
 			}
 		});
 
+		const rows = db
+			.select({
+				matchId: nodes.matchId,
+				participant_name: participants.name,
+				status: nodes.status,
+				round: nodes.round,
+				winnerId: nodes.winnerId,
+				participantId: participants.challongeParticipantId
+			})
+			.from(nodes)
+			.innerJoin(brackets, eq(nodes.bracketId, brackets.id))
+			.leftJoin(participants, eq(participants.id, nodes.participantId))
+			.where(eq(brackets.tournamentId, tournamentId))
+			.all();
+
+		const rounds = Object.groupBy(rows, ({ round }) => round);
+		const groupedMatches = Object.values(rounds).map((round) => {
+			if (!round) return [];
+			return Object.values(Object.groupBy(round, ({ matchId }) => matchId));
+		});
+
 		return json({
-			message: 'Bracket synchronized.'
+			matches: groupedMatches
 		});
 	} catch (error) {
 		console.error('Failed to sync bracket:', error);

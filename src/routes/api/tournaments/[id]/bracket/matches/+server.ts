@@ -17,19 +17,18 @@ export async function GET({ params }) {
 				participant_name: participants.name,
 				status: nodes.status,
 				round: nodes.round,
-				winnerId: nodes.winnerId
+				winnerId: nodes.winnerId,
+				participantId: participants.challongeParticipantId
 			})
 			.from(nodes)
 			.innerJoin(brackets, eq(nodes.bracketId, brackets.id))
-			.innerJoin(participants, eq(participants.id, nodes.participantId))
+			.leftJoin(participants, eq(participants.id, nodes.participantId))
 			.where(eq(brackets.tournamentId, tournamentId))
 			.all();
 
 		const rounds = Object.groupBy(rows, ({ round }) => round);
-
 		const matches = Object.values(rounds).map((round) => {
 			if (!round) return [];
-
 			return Object.values(Object.groupBy(round, ({ matchId }) => matchId));
 		});
 

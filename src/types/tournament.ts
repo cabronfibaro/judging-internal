@@ -15,3 +15,14 @@ export type Entrant = {
 	status: 'qualified' | 'not_qualified' | 'pending' | 'scored';
 	score: number;
 };
+
+export type Match = {
+	matchId: string;
+	participant_name: string;
+	status: 'pending' | 'open';
+	round: number;
+	winnerId: string | null;
+	participantId: string | null;
+};
+
+export type GroupedMatches = Match[][][];
