@@ -4,9 +4,47 @@
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
 	import { capitalize } from 'es-toolkit/string';
-	import type { GroupedMatches } from '../../../types/tournament';
+	import type { Entrant, GroupedMatches, Match } from '../../../types/tournament';
+	import { Stage } from '$lib/judging/stage.svelte';
+	import type { Judgement } from '$lib/judging/judgement.svelte';
 
-	let { matches }: { matches: GroupedMatches } = $props();
+	let {
+		matches,
+		judgement,
+		entrants,
+		stage
+	}: { matches: GroupedMatches; judgement: Judgement; entrants: Entrant[]; stage: Stage } =
+		$props();
+
+	let selectedMatchId = $state<string | undefined>(undefined);
+
+	function onSelectMatch(match: Match[]) {
+		stage.clear();
+		judgement.clear();
+
+		selectedMatchId = match[0].matchId;
+
+		const p1 = match[0];
+		const p2 = match[1];
+
+		// only select match that already have 2 participants
+		if (!p1.participantId || !p2.participantId) {
+			console.warn('missing participant id');
+			return;
+		}
+
+		const p1Entrant = entrants.find((entrant) => entrant.participantId === p1.participantId);
+		const p2Entrant = entrants.find((entrant) => entrant.participantId === p2.participantId);
+
+		if (!p1Entrant || !p2Entrant) {
+			console.warn('missing participant score');
+			return;
+		}
+
+		const lead = p1Entrant.score > p2Entrant.score ? 'p1' : 'p2';
+
+		stage.setDrivers(p1.participantId, p2.participantId, lead);
+	}
 
 	const sortedMatches = $derived(
 		[...matches].sort((a, b) => {
@@ -63,17 +101,19 @@
 
 				<div class="grid gap-3">
 					{#each round as match}
-						<Card>
+						{@const currentMatch = match[0]}
+						<Card
+							onclick={() => onSelectMatch(match)}
+							class={selectedMatchId === currentMatch.matchId ? 'border border-green-500' : ''}
+						>
 							<CardHeader class="pb-3">
 								<div class="flex items-center justify-between">
 									<CardTitle class="text-sm">
 										Match {match[0]?.matchId}
 									</CardTitle>
 
-									{#if match[0]?.status === 'open'}
-										<Badge>On Going</Badge>
-									{:else}
-										<Badge variant="secondary">{capitalize(match[0].status)}</Badge>
+									{#if currentMatch?.status !== 'open'}
+										<Badge variant="secondary">{capitalize(currentMatch.status)}</Badge>
 									{/if}
 								</div>
 							</CardHeader>

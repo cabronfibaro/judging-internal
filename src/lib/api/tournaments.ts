@@ -66,27 +66,22 @@ export async function getMatches(tournamentId: string) {
 	return matches;
 }
 
+export async function startTournament(tournamentId: string) {
+	await getJson(fetch, `/api/tournaments/${tournamentId}/state`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			state: 'start'
+		})
+	});
+}
+
 export async function syncTournament(
 	fetch: typeof globalThis.fetch,
 	tournamentId: string
 ): Promise<GroupedMatches> {
-	const { bracket } = await getJson<{ bracket: { status: string } }>(
-		fetch,
-		`/api/tournaments/${tournamentId}/bracket`
-	);
-
-	if (bracket.status !== 'started') {
-		await getJson(fetch, `/api/tournaments/${tournamentId}/state`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				state: 'start'
-			})
-		});
-	}
-
 	const { matches } = await getJson<{ matches: GroupedMatches }>(
 		fetch,
 		`/api/tournaments/${tournamentId}/bracket/sync`

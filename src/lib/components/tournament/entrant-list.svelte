@@ -9,8 +9,8 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { Button } from '$lib/components/ui/button';
 	import { createMutation, useQueryClient } from '@tanstack/svelte-query';
-	import type { Entrant, GroupedMatches, Tournament } from '../../../types/tournament';
-	import { syncTournament, updateTournament } from '$lib/api/tournaments';
+	import type { Entrant, Tournament } from '../../../types/tournament';
+	import { startTournament, syncTournament, updateTournament } from '$lib/api/tournaments';
 	import AlertDialog from '../ui/alert-dialog/alert-dialog.svelte';
 	import AlertDialogTrigger from '../ui/alert-dialog/alert-dialog-trigger.svelte';
 	import AlertDialogContent from '../ui/alert-dialog/alert-dialog-content.svelte';
@@ -23,13 +23,10 @@
 
 	let {
 		tournament = $bindable(),
-		entrants,
-		// eslint-disable-next-line no-useless-assignment
-		matches = $bindable()
+		entrants
 	}: {
 		tournament: Tournament;
 		entrants: Entrant[];
-		matches: GroupedMatches;
 	} = $props();
 
 	const queryClient = useQueryClient();
@@ -57,7 +54,6 @@
 		if (!entrant) return;
 
 		const reordered = [entrant, ...orderedEntrants];
-
 		updateTournamentMutation.mutate({
 			tournamentId: tournament.id,
 			qualifyingOrder: reordered.map((entrant) => entrant.participantId)
@@ -81,7 +77,6 @@
 			});
 
 			const data = await response.json();
-
 			if (!response.ok) {
 				throw new Error(data.message ?? 'Failed to update qualifier.');
 			}
@@ -114,7 +109,6 @@
 			);
 
 			const data = await response.json();
-
 			if (!response.ok) {
 				throw new Error(data.message ?? 'Failed to conclude qualifiers.');
 			}
@@ -123,10 +117,11 @@
 		},
 
 		onSuccess: async ({ tournament: newTournament }: { tournament: Tournament }) => {
-			matches = await syncTournament(fetch, tournament.id);
 			tournament = newTournament;
+			await startTournament(tournament.id);
+			await syncTournament(fetch, tournament.id);
 			await queryClient.invalidateQueries({
-				queryKey: ['entrants', newTournament.id]
+				queryKey: ['matches', tournament.id]
 			});
 			concludeDialogOpen = false;
 		}

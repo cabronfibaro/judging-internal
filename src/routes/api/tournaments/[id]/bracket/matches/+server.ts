@@ -18,7 +18,9 @@ export async function GET({ params }) {
 				status: nodes.status,
 				round: nodes.round,
 				winnerId: nodes.winnerId,
-				participantId: participants.challongeParticipantId
+				challongeParticipantId: participants.challongeParticipantId,
+				participantId: participants.id,
+				score: nodes.score
 			})
 			.from(nodes)
 			.innerJoin(brackets, eq(nodes.bracketId, brackets.id))

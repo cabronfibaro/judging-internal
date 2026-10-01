@@ -118,5 +118,6 @@ export const nodes = sqliteTable('nodes', {
 	matchId: text('match_id').notNull(),
 	winnerId: text('winner_id'), // CHALLONGE PARTICIPANT ID
 	status: text('status', { enum: ['pending', 'open'] }).notNull(),
-	round: int('round').notNull()
+	round: int('round').notNull(),
+	score: int('score').default(0)
 });

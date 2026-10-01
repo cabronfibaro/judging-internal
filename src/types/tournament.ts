@@ -10,6 +10,7 @@ export type Tournament = {
 
 export type Entrant = {
 	id: string;
+	challongeParticipantId: string;
 	participantId: string;
 	name: string;
 	status: 'qualified' | 'not_qualified' | 'pending' | 'scored';
@@ -23,6 +24,8 @@ export type Match = {
 	round: number;
 	winnerId: string | null;
 	participantId: string | null;
+	challongeParticpantId: string | null;
+	score: number;
 };
 
 export type GroupedMatches = Match[][][];

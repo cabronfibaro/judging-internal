@@ -1,0 +1,1 @@
+ALTER TABLE `nodes` ADD `score` integer DEFAULT 0;

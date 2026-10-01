@@ -15,6 +15,13 @@
       "when": 1790745070228,
       "tag": "0001_nappy_infant_terrible",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790854584252,
+      "tag": "0002_volatile_molten_man",
+      "breakpoints": true
     }
   ]
 }
