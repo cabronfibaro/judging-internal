@@ -58,12 +58,6 @@ export async function POST({ request }) {
 		.map((name) => name.trim())
 		.filter(Boolean);
 
-	const qualifyingOrder = Array.from({ length: names.length }, (_, i) => i);
-	for (let i = qualifyingOrder.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[qualifyingOrder[i], qualifyingOrder[j]] = [qualifyingOrder[j], qualifyingOrder[i]];
-	}
-
 	const tournamentName = name.trim();
 	const trackName = track.trim();
 
@@ -158,20 +152,21 @@ export async function POST({ request }) {
 					.all();
 			}
 
+			const qualifierRows = [];
+			const participantIds = [];
+
 			const [createdTournament] = tx
 				.insert(tournaments)
 				.values({
 					name: tournamentName,
 					startingDate: date,
 					trackId: trackRow.id,
-					qualifyingOrder: qualifyingOrder.join(', '),
+					qualifyingOrder: '',
 					size,
 					randomizeQualifyingOrder
 				})
 				.returning()
 				.all();
-
-			const qualifierRows = [];
 
 			for (const participantName of names) {
 				const existingParticipant = tx
@@ -194,11 +189,27 @@ export async function POST({ request }) {
 						.all();
 				}
 
+				participantIds.push(participant.id);
+
 				qualifierRows.push({
 					tournamentId: createdTournament.id,
 					participantId: participant.id
 				});
 			}
+
+			if (randomizeQualifyingOrder) {
+				for (let i = participantIds.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[participantIds[i], participantIds[j]] = [participantIds[j], participantIds[i]];
+				}
+			}
+
+			const qualifyingOrder = participantIds.join(', ');
+
+			tx.update(tournaments)
+				.set({ qualifyingOrder })
+				.where(eq(tournaments.id, createdTournament.id))
+				.run();
 
 			tx.insert(entrants).values(qualifierRows).run();
 			tx.insert(brackets)

@@ -56,9 +56,6 @@ class Stage {
 	}
 
 	move(src: number, to: number) {
-		const [queueItem] = this.queue.splice(src, 1);
-		this.queue.splice(to, 0, queueItem);
-
 		const [orderItem] = this.orders.splice(src, 1);
 		this.orders.splice(to, 0, orderItem);
 	}
