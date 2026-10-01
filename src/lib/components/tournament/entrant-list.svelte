@@ -89,10 +89,10 @@
 			return data;
 		},
 
-		onSuccess: async ({ qualifier }: { qualifier: Entrant }) => {
-			queryClient.setQueryData<Entrant[]>(['entrants', tournament.id], (current = []) =>
-				current.map((entrant) => (entrant.id === qualifier.id ? qualifier : entrant))
-			);
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({
+				queryKey: ['entrants', tournament.id]
+			});
 		}
 	}));
 
@@ -103,6 +103,7 @@
 		});
 	}
 
+	let concludeDialogOpen = $state(false);
 	const concludeQualifiersMutation = createMutation(() => ({
 		mutationFn: async () => {
 			const response = await fetch(
@@ -121,13 +122,13 @@
 			return data;
 		},
 
-		onSuccess: async ({ tournament }: { tournament: Tournament }) => {
-			if (tournament.status === 'elimination') {
-				matches = await syncTournament(fetch, tournament.id);
-				await queryClient.invalidateQueries({
-					queryKey: ['entrants', tournament.id]
-				});
-			}
+		onSuccess: async ({ tournament: newTournament }: { tournament: Tournament }) => {
+			matches = await syncTournament(fetch, tournament.id);
+			tournament = newTournament;
+			await queryClient.invalidateQueries({
+				queryKey: ['entrants', newTournament.id]
+			});
+			concludeDialogOpen = false;
 		}
 	}));
 
@@ -223,7 +224,7 @@
 	</div>
 
 	{#if concluding}
-		<AlertDialog>
+		<AlertDialog bind:open={concludeDialogOpen}>
 			<AlertDialogTrigger class="w-full">
 				<Button class="w-full" variant="default" disabled={concludeQualifiersMutation.isPending}>
 					Conclude
@@ -244,7 +245,9 @@
 					<AlertDialogCancel>Cancel</AlertDialogCancel>
 
 					<AlertDialogAction
-						onclick={() => concludeQualifiersMutation.mutate()}
+						onclick={() => {
+							concludeQualifiersMutation.mutate();
+						}}
 						disabled={concludeQualifiersMutation.isPending}
 					>
 						{concludeQualifiersMutation.isPending ? 'Concluding...' : 'Conclude'}
