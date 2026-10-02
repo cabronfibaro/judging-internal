@@ -60,6 +60,19 @@ class Stage {
 		}
 	}
 
+	getScores() {
+		return [
+			{
+				participantId: this.state.p1.participantId,
+				score: this.state.p1.state === 'lead' ? this.state.p1.lead_score : this.state.p1.chase_score
+			},
+			{
+				participantId: this.state.p2.participantId,
+				score: this.state.p2.state === 'lead' ? this.state.p2.lead_score : this.state.p2.chase_score
+			}
+		];
+	}
+
 	resetScores() {
 		this.state.p1.lead_score = -1;
 		this.state.p1.chase_score = -1;

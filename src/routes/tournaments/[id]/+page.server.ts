@@ -1,4 +1,4 @@
-import { getEntrants, syncTournament } from '$lib/api/tournaments.js';
+import { getEntrants, syncTournament, type Battles } from '$lib/api/tournaments.js';
 import { getJson } from '$lib/utils';
 import type { CriteriaCatrgory } from '../../../types/index.js';
 import type { GroupedMatches, Tournament } from '../../../types/tournament';
@@ -18,14 +18,18 @@ export async function load({ fetch, params }) {
 	]);
 
 	let matches: GroupedMatches = [];
+	let battles: Battles = [];
 	if (tournament.status === 'elimination') {
-		matches = await syncTournament(fetch, id);
+		const { matches: _matches, battles: _battles } = await syncTournament(fetch, id);
+		matches = _matches;
+		battles = _battles;
 	}
 
 	return {
 		tournament,
 		entrants,
 		matches,
+		battles,
 		criteriaConfig
 	};
 }

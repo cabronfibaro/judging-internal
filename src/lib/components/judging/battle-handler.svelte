@@ -7,6 +7,8 @@
 	import Card from '../ui/card/card.svelte';
 	import DebugJudgement from './debug-judgement.svelte';
 	import type { Stage } from '$lib/judging/stage.svelte';
+	import { useQueryClient } from '@tanstack/svelte-query';
+	import { getJson } from '$lib/utils';
 
 	let {
 		judgement,
@@ -16,17 +18,45 @@
 		stage: Stage;
 	} = $props();
 
+	const queryClient = useQueryClient();
+
 	async function onSubmitJudgement() {
-		const { lead, chase } = judgement.finalizedScore();
+		const scores = judgement.finalizedScore();
+		stage.setScore(scores);
+		const [p1, p2] = stage.getScores();
 
-		// set score for the run
-		// switch leader
-		stage.setScore({ lead, chase });
-		stage.switchLeader();
+		await Promise.all([
+			getJson(fetch, `/api/tournaments/${stage.tournamentId}/bracket/matches/${stage.matchId}`, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					...p1,
+					appendScore: true
+				})
+			}),
+			getJson(fetch, `/api/tournaments/${stage.tournamentId}/bracket/matches/${stage.matchId}`, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					...p2,
+					appendScore: true
+				})
+			})
+		]);
 
-		Promise.all([]);
+		await getJson(
+			fetch,
+			`/api/tournaments/${stage.tournamentId}/bracket/matches/${stage.matchId}/changeLeader`
+		);
 
-		console.log(stage.state);
+		await queryClient.invalidateQueries({
+			queryKey: ['activeBattles', stage.tournamentId]
+		});
+
 		judgement.clear();
 	}
 </script>

@@ -78,14 +78,27 @@ export async function startTournament(tournamentId: string) {
 	});
 }
 
-export async function syncTournament(
-	fetch: typeof globalThis.fetch,
-	tournamentId: string
-): Promise<GroupedMatches> {
-	const { matches } = await getJson<{ matches: GroupedMatches }>(
+export type Battles = {
+	id: string;
+	matchId: string;
+	participantId: string;
+	leadStatus: number;
+}[];
+
+export async function syncTournament(fetch: typeof globalThis.fetch, tournamentId: string) {
+	const { matches, battles } = await getJson<{ matches: GroupedMatches; battles: Battles }>(
 		fetch,
 		`/api/tournaments/${tournamentId}/bracket/sync`
 	);
 
-	return matches;
+	return { matches, battles };
+}
+
+export async function getActiveBattles(tournamentId: string) {
+	const battles = await getJson<Battles>(
+		fetch,
+		`/api/tournaments/${tournamentId}/bracket/activeBattles`
+	);
+
+	return battles;
 }

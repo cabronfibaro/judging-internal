@@ -117,7 +117,25 @@ export const nodes = sqliteTable('nodes', {
 	}),
 	matchId: text('match_id').notNull(),
 	winnerId: text('winner_id'), // CHALLONGE PARTICIPANT ID
-	status: text('status', { enum: ['pending', 'open'] }).notNull(),
+	status: text('status').notNull(),
 	round: int('round').notNull(),
 	score: int('score').default(0)
+});
+
+export type Node = typeof nodes.$inferSelect;
+
+export const activeBattles = sqliteTable('active_battles', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => nanoid(15)),
+
+	matchId: text('match_id').notNull(),
+
+	participantId: text('participant_id')
+		.notNull()
+		.references(() => participants.id, {
+			onDelete: 'cascade'
+		}),
+
+	leadStatus: int('lead_status').notNull().default(0)
 });

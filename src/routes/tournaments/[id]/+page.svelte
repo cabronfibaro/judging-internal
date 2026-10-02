@@ -2,7 +2,7 @@
 	import StageCard from '$lib/components/judging/stage-card.svelte';
 	import { createQuery } from '@tanstack/svelte-query';
 	import type { Tournament } from '../../../types/tournament.js';
-	import { getEntrants, getMatches } from '$lib/api/tournaments.js';
+	import { getActiveBattles, getEntrants, getMatches } from '$lib/api/tournaments.js';
 	import EntrantList from '$lib/components/tournament/entrant-list.svelte';
 	import Matches from '$lib/components/tournament/matches.svelte';
 	import Panel from '$lib/components/judging/panel.svelte';
@@ -34,6 +34,14 @@
 		initialData: data.matches
 	}));
 
+	const activeBattles = createQuery(() => ({
+		queryKey: ['activeBattles', tournament.id],
+		queryFn: async () => {
+			return getActiveBattles(tournament.id);
+		},
+		initialData: data.battles
+	}));
+
 	let initialized = $state(false);
 	$effect(() => {
 		if (initialized) {
@@ -54,10 +62,15 @@
 		{#if isQualifying}
 			<EntrantList bind:tournament entrants={entrantsQuery.data} />
 		{:else}
-			<Matches {stage} matches={matchesQuery.data} entrants={entrantsQuery.data} {judgement} />
+			<Matches
+				{stage}
+				matches={matchesQuery.data}
+				activeBattles={activeBattles.data ?? []}
+				{judgement}
+			/>
 		{/if}
 	</StageCard>
-	<Panel {judgement} {categories} {isQualifying}>
+	<Panel {stage} {judgement} {categories} {isQualifying}>
 		{#if isQualifying}
 			<QualifyingHandler bind:tournament {judgement} entrants={entrantsQuery.data} />
 		{:else}

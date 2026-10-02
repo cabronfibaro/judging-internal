@@ -24,7 +24,7 @@ export type Match = {
 	round: number;
 	winnerId: string | null;
 	participantId: string | null;
-	challongeParticpantId: string | null;
+	challongeParticipantId: string | null;
 	score: number;
 };
 
