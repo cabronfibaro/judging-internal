@@ -1,0 +1,1 @@
+ALTER TABLE `active_battles` ADD `rerun` integer DEFAULT 0;

@@ -9,6 +9,8 @@
 	import type { Judgement } from '$lib/judging/judgement.svelte';
 	import Button from '../ui/button/button.svelte';
 	import type { Battles } from '$lib/api/tournaments';
+	import { getJson } from '$lib/utils';
+	import { useQueryClient } from '@tanstack/svelte-query';
 
 	let {
 		matches,
@@ -21,6 +23,8 @@
 		stage: Stage;
 		activeBattles: Battles;
 	} = $props();
+
+	const queryClient = useQueryClient();
 
 	let selectedMatchId = $state<string | undefined>(undefined);
 
@@ -84,9 +88,7 @@
 			.map((round) =>
 				round.map((match) => {
 					const battles = activeBattles.filter((battle) => battle.matchId === match[0]?.matchId);
-
 					const leadingBattle = battles.find((battle) => battle.leadStatus === 1);
-
 					return {
 						match,
 						leadingParticipantId: leadingBattle?.participantId ?? null
@@ -94,6 +96,23 @@
 				})
 			)
 	);
+
+	async function onHandleOMT(match: Match[]) {
+		await getJson(
+			fetch,
+			`/api/tournaments/${stage.tournamentId}/bracket/matches/${selectedMatchId}/omt`
+		);
+
+		await queryClient.invalidateQueries({
+			queryKey: ['activeBattles', stage.tournamentId]
+		});
+
+		await queryClient.invalidateQueries({
+			queryKey: ['matches', stage.tournamentId]
+		});
+
+		onStartMatch(match);
+	}
 </script>
 
 <div class="space-y-4">
@@ -144,9 +163,7 @@
 						<Card class={selectedMatchId === currentMatch.matchId ? 'border border-green-500' : ''}>
 							<CardHeader class="pb-3">
 								<div class="flex items-center justify-between">
-									<CardTitle class="text-sm">
-										Match {currentMatch.matchId}
-									</CardTitle>
+									<CardTitle class="text-sm">Match</CardTitle>
 
 									{#if currentMatch.status !== 'open'}
 										<Badge variant="secondary">
@@ -166,15 +183,19 @@
 												: ''
 										]}
 									>
-										<div class="flex items-center gap-3">
-											<span class="font-medium">
-												{entrant.participant_name ?? 'TBD'}
-											</span>
+										<div class="flex items-center justify-between">
+											<div class="flex items-center gap-3">
+												<span class="font-medium">
+													{entrant.participant_name ?? 'TBD'}
+												</span>
 
-											{#if matchData.leadingParticipantId === entrant.participantId}
-												<Badge variant="outline">Lead</Badge>
-											{/if}
+												{#if matchData.leadingParticipantId === entrant.participantId}
+													<Badge variant="outline">Lead</Badge>
+												{/if}
+											</div>
 										</div>
+
+										<span>{entrant.score}</span>
 
 										{#if entrant.winnerId !== null && entrant.winnerId === entrant.participantId}
 											<Badge>Winner</Badge>
@@ -183,7 +204,11 @@
 								{/each}
 
 								<div class="flex justify-end">
-									<Button onclick={() => onStartMatch(match)}>Start</Button>
+									{#if selectedMatchId !== currentMatch.matchId}
+										<Button onclick={() => onStartMatch(match)}>Start</Button>
+									{:else}
+										<Button variant="outline" onclick={async () => onHandleOMT(match)}>OMT</Button>
+									{/if}
 								</div>
 							</CardContent>
 						</Card>

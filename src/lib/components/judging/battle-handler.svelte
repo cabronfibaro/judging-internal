@@ -57,6 +57,11 @@
 			queryKey: ['activeBattles', stage.tournamentId]
 		});
 
+		await queryClient.invalidateQueries({
+			queryKey: ['matches', stage.tournamentId]
+		});
+
+		stage.switchLeader();
 		judgement.clear();
 	}
 </script>

@@ -128,14 +128,12 @@ export const activeBattles = sqliteTable('active_battles', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => nanoid(15)),
-
 	matchId: text('match_id').notNull(),
-
 	participantId: text('participant_id')
 		.notNull()
 		.references(() => participants.id, {
 			onDelete: 'cascade'
 		}),
-
-	leadStatus: int('lead_status').notNull().default(0)
+	leadStatus: int('lead_status').notNull().default(0),
+	rerun: int('rerun').default(0)
 });
