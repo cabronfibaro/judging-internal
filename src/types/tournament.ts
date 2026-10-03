@@ -20,7 +20,7 @@ export type Entrant = {
 export type Match = {
 	matchId: string;
 	participant_name: string;
-	status: 'pending' | 'open';
+	status: 'pending' | 'open' | 'complete';
 	round: number;
 	winnerId: string | null;
 	participantId: string | null;

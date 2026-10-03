@@ -8,7 +8,7 @@
 	import { Stage } from '$lib/judging/stage.svelte';
 	import type { Judgement } from '$lib/judging/judgement.svelte';
 	import Button from '../ui/button/button.svelte';
-	import type { Battles } from '$lib/api/tournaments';
+	import { syncTournament, type Battles } from '$lib/api/tournaments';
 	import { getJson } from '$lib/utils';
 	import { useQueryClient } from '@tanstack/svelte-query';
 
@@ -113,6 +113,23 @@
 
 		onStartMatch(match);
 	}
+
+	async function onHandleConclude() {
+		await getJson(
+			fetch,
+			`/api/tournaments/${stage.tournamentId}/bracket/matches/${selectedMatchId}/conclude`
+		);
+
+		await syncTournament(fetch, stage.tournamentId);
+
+		await queryClient.invalidateQueries({
+			queryKey: ['activeBattles', stage.tournamentId]
+		});
+
+		await queryClient.invalidateQueries({
+			queryKey: ['matches', stage.tournamentId]
+		});
+	}
 </script>
 
 <div class="space-y-4">
@@ -203,11 +220,15 @@
 									</div>
 								{/each}
 
-								<div class="flex justify-end">
-									{#if selectedMatchId !== currentMatch.matchId}
-										<Button onclick={() => onStartMatch(match)}>Start</Button>
-									{:else}
+								<div class="flex justify-end gap-4">
+									{#if selectedMatchId !== currentMatch.matchId && currentMatch.status !== 'complete'}
+										<Button onclick={() => onStartMatch(match)}>Load</Button>
+									{/if}
+									{#if selectedMatchId === currentMatch.matchId}
 										<Button variant="outline" onclick={async () => onHandleOMT(match)}>OMT</Button>
+										<Button variant="outline" onclick={async () => onHandleConclude()}
+											>Conclude</Button
+										>
 									{/if}
 								</div>
 							</CardContent>

@@ -123,6 +123,9 @@
 			await queryClient.invalidateQueries({
 				queryKey: ['matches', tournament.id]
 			});
+			await queryClient.invalidateQueries({
+				queryKey: ['activeBattles', tournament.id]
+			});
 			concludeDialogOpen = false;
 		}
 	}));

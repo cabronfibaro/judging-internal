@@ -74,13 +74,14 @@ export async function GET({ params, fetch }) {
 			.where(and(eq(nodes.bracketId, bracket.id), inArray(nodes.matchId, matchIds)))
 			.all();
 
-		const nodeMap = new Map(existingNodes.map((node) => [node.matchId, node]));
-
 		db.transaction((tx) => {
 			for (const match of matches) {
 				const { state, round, points_by_participant, winner_id } = match.attributes;
 
-				for (const entry of points_by_participant) {
+				// Get the existing two nodes for this match.
+				const matchNodes = existingNodes.filter((node) => node.matchId === match.id);
+
+				for (const [index, entry] of points_by_participant.entries()) {
 					const participantId = entry.participant_id
 						? participantMap.get(String(entry.participant_id))
 						: null;
@@ -91,7 +92,7 @@ export async function GET({ params, fetch }) {
 						);
 					}
 
-					const existingNode = nodeMap.get(match.id);
+					const existingNode = matchNodes[index];
 
 					const values = {
 						bracketId: bracket.id,
@@ -118,7 +119,6 @@ export async function GET({ params, fetch }) {
 				}
 			}
 		});
-
 		const { matches: groupedMatches } = await getJson<{ matches: GroupedMatches }>(
 			fetch,
 			`/api/tournaments/${tournamentId}/bracket/matches`
