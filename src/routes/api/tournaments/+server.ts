@@ -4,8 +4,10 @@ import { CHALLONGE_API_KEY } from '$env/static/private';
 import { participants, entrants, tournaments, tracks, brackets } from '$lib/server/db/schema';
 import { db } from '$lib/server/db/client';
 import { snakeCase } from 'es-toolkit';
+import { getJson } from '$lib/utils.js';
+import type { GroupedMatches } from '../../../types/tournament.js';
 
-export async function GET() {
+export async function GET({ fetch }) {
 	try {
 		const result = await db
 			.select({
@@ -22,12 +24,33 @@ export async function GET() {
 			.leftJoin(tracks, eq(tournaments.trackId, tracks.id))
 			.leftJoin(brackets, eq(tournaments.id, brackets.tournamentId));
 
+		const tournamentsWithProgress = await Promise.all(
+			result.map(async (tournament) => {
+				const { matches } = await getJson<{ matches: GroupedMatches }>(
+					fetch,
+					`/api/tournaments/${tournament.id}/bracket/matches`
+				);
+
+				const allMatches = matches.flat();
+
+				const completedMatches = allMatches.filter((match) =>
+					match.every((node) => node.status === 'complete')
+				).length;
+
+				const progress = allMatches.length === 0 ? 0 : completedMatches / allMatches.length;
+
+				return {
+					...tournament,
+					progress
+				};
+			})
+		);
+
 		return json({
-			tournaments: result
+			tournaments: tournamentsWithProgress
 		});
 	} catch (error) {
 		console.error('Failed to get tournaments:', error);
-
 		return json({ message: 'Failed to get tournaments.' }, { status: 500 });
 	}
 }
