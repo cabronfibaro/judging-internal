@@ -3,6 +3,17 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
+	import {
+		AlertDialog,
+		AlertDialogAction,
+		AlertDialogCancel,
+		AlertDialogContent,
+		AlertDialogDescription,
+		AlertDialogFooter,
+		AlertDialogHeader,
+		AlertDialogTitle,
+		AlertDialogTrigger
+	} from '$lib/components/ui/alert-dialog';
 	import { capitalize } from 'es-toolkit/string';
 	import type { GroupedMatches, Match } from '../../../types/tournament';
 	import { Stage } from '$lib/judging/stage.svelte';
@@ -129,6 +140,35 @@
 		await queryClient.invalidateQueries({
 			queryKey: ['matches', stage.tournamentId]
 		});
+
+		stage.clear();
+		selectedMatchId = undefined;
+	}
+
+	let isProcessing = $state(false);
+	let omtDialogOpen = $state(false);
+	let concludeDialogOpen = $state(false);
+
+	async function handleOMT(match: Match[]) {
+		isProcessing = true;
+
+		try {
+			await onHandleOMT(match);
+			omtDialogOpen = false;
+		} finally {
+			isProcessing = false;
+		}
+	}
+
+	async function handleConclude() {
+		isProcessing = true;
+
+		try {
+			await onHandleConclude();
+			concludeDialogOpen = false;
+		} finally {
+			isProcessing = false;
+		}
 	}
 </script>
 
@@ -177,7 +217,7 @@
 						{@const match = matchData.match}
 						{@const currentMatch = match[0]}
 
-						<Card class={selectedMatchId === currentMatch.matchId ? 'border border-green-500' : ''}>
+						<Card>
 							<CardHeader class="pb-3">
 								<div class="flex items-center justify-between">
 									<CardTitle class="text-sm">Match</CardTitle>
@@ -195,8 +235,8 @@
 									<div
 										class={[
 											'flex items-center justify-between rounded-md border px-4 py-3',
-											entrant.winnerId === entrant.participantId
-												? 'bg-accent text-accent-foreground'
+											entrant.winnerId === entrant.challongeParticipantId
+												? 'border-green-500/30 bg-green-500/10'
 												: ''
 										]}
 									>
@@ -206,7 +246,7 @@
 													{entrant.participant_name ?? 'TBD'}
 												</span>
 
-												{#if matchData.leadingParticipantId === entrant.participantId}
+												{#if matchData.leadingParticipantId === entrant.participantId && currentMatch.status !== 'complete'}
 													<Badge variant="outline">Lead</Badge>
 												{/if}
 											</div>
@@ -225,10 +265,66 @@
 										<Button onclick={() => onStartMatch(match)}>Load</Button>
 									{/if}
 									{#if selectedMatchId === currentMatch.matchId}
-										<Button variant="outline" onclick={async () => onHandleOMT(match)}>OMT</Button>
-										<Button variant="outline" onclick={async () => onHandleConclude()}
-											>Conclude</Button
-										>
+										<AlertDialog bind:open={omtDialogOpen}>
+											<AlertDialogTrigger>
+												<Button variant="outline" disabled={isProcessing}>OMT</Button>
+											</AlertDialogTrigger>
+
+											<AlertDialogContent>
+												<AlertDialogHeader>
+													<AlertDialogTitle>Start OMT?</AlertDialogTitle>
+													<AlertDialogDescription>
+														This will reset the battle and start an OMT. Are you sure you want to
+														continue?
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+
+												<AlertDialogFooter>
+													<AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+
+													<AlertDialogAction
+														disabled={isProcessing}
+														onclick={() => handleOMT(match)}
+													>
+														{#if isProcessing}
+															Processing...
+														{:else}
+															Continue
+														{/if}
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
+
+										<AlertDialog bind:open={concludeDialogOpen}>
+											<AlertDialogTrigger>
+												<Button variant="outline" disabled={isProcessing}>Conclude</Button>
+											</AlertDialogTrigger>
+
+											<AlertDialogContent>
+												<AlertDialogHeader>
+													<AlertDialogTitle>Conclude match?</AlertDialogTitle>
+													<AlertDialogDescription>
+														This will finalize the result of this match. Are you sure?
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+
+												<AlertDialogFooter>
+													<AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+
+													<AlertDialogAction
+														disabled={isProcessing}
+														onclick={() => handleConclude()}
+													>
+														{#if isProcessing}
+															Processing...
+														{:else}
+															Conclude
+														{/if}
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
 									{/if}
 								</div>
 							</CardContent>

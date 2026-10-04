@@ -22,6 +22,8 @@
 
 	const queryClient = useQueryClient();
 
+	let submitting = $state(false);
+
 	const updateTournamentMutation = createMutation(() => ({
 		mutationFn: async ({
 			tournamentId,
@@ -76,15 +78,26 @@
 	const orderedEntrants = $derived.by(() => {
 		const order = tournament.qualifyingOrder.split(',').map((id) => id.trim());
 		const byParticipantId = new Map(entrants.map((entrant) => [entrant.participantId, entrant]));
+
 		return order
 			.map((id) => byParticipantId.get(id))
 			.filter((entrant): entrant is Entrant => entrant !== undefined);
 	});
 
 	async function onSubmitJudgement() {
-		const { lead } = judgement.finalizedScore();
-		await handleQualifying(lead);
-		judgement.clear();
+		if (submitting) return;
+
+		submitting = true;
+
+		try {
+			const { lead } = judgement.finalizedScore();
+
+			await handleQualifying(lead);
+
+			judgement.clear();
+		} finally {
+			submitting = false;
+		}
 	}
 
 	async function handleQualifying(score: number) {
@@ -117,9 +130,23 @@
 
 	<CardContent class="space-y-3">
 		<DebugJudgement show results={judgement.results} />
-		<Button class="w-full" onclick={onSubmitJudgement}>Submit Judgment</Button>
-		<Button variant="destructive" type="reset" class="w-full" onclick={() => judgement.clear()}
-			>Reset</Button
+
+		<Button class="w-full" onclick={onSubmitJudgement} disabled={submitting}>
+			{#if submitting}
+				Submitting...
+			{:else}
+				Submit Judgment
+			{/if}
+		</Button>
+
+		<Button
+			variant="destructive"
+			type="reset"
+			class="w-full"
+			onclick={() => judgement.clear()}
+			disabled={submitting}
 		>
+			Reset
+		</Button>
 	</CardContent>
 </Card>

@@ -19,50 +19,59 @@
 	} = $props();
 
 	const queryClient = useQueryClient();
+	let submitting = $state(false);
 
 	async function onSubmitJudgement() {
-		const scores = judgement.finalizedScore();
-		stage.setScore(scores);
-		const [p1, p2] = stage.getScores();
+		if (submitting) return;
 
-		await Promise.all([
-			getJson(fetch, `/api/tournaments/${stage.tournamentId}/bracket/matches/${stage.matchId}`, {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					...p1,
-					appendScore: true
+		submitting = true;
+
+		try {
+			const scores = judgement.finalizedScore();
+			stage.setScore(scores);
+			const [p1, p2] = stage.getScores();
+
+			await Promise.all([
+				getJson(fetch, `/api/tournaments/${stage.tournamentId}/bracket/matches/${stage.matchId}`, {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						...p1,
+						appendScore: true
+					})
+				}),
+				getJson(fetch, `/api/tournaments/${stage.tournamentId}/bracket/matches/${stage.matchId}`, {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						...p2,
+						appendScore: true
+					})
 				})
-			}),
-			getJson(fetch, `/api/tournaments/${stage.tournamentId}/bracket/matches/${stage.matchId}`, {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					...p2,
-					appendScore: true
-				})
-			})
-		]);
+			]);
 
-		await getJson(
-			fetch,
-			`/api/tournaments/${stage.tournamentId}/bracket/matches/${stage.matchId}/changeLeader`
-		);
+			await getJson(
+				fetch,
+				`/api/tournaments/${stage.tournamentId}/bracket/matches/${stage.matchId}/changeLeader`
+			);
 
-		await queryClient.invalidateQueries({
-			queryKey: ['activeBattles', stage.tournamentId]
-		});
+			await queryClient.invalidateQueries({
+				queryKey: ['activeBattles', stage.tournamentId]
+			});
 
-		await queryClient.invalidateQueries({
-			queryKey: ['matches', stage.tournamentId]
-		});
+			await queryClient.invalidateQueries({
+				queryKey: ['matches', stage.tournamentId]
+			});
 
-		stage.switchLeader();
-		judgement.clear();
+			stage.switchLeader();
+			judgement.clear();
+		} finally {
+			submitting = false;
+		}
 	}
 </script>
 
@@ -73,9 +82,23 @@
 
 	<CardContent class="space-y-3">
 		<DebugJudgement show results={judgement.results} />
-		<Button class="w-full" onclick={onSubmitJudgement}>Submit Judgment</Button>
-		<Button variant="destructive" type="reset" class="w-full" onclick={() => judgement.clear()}
-			>Reset</Button
+
+		<Button class="w-full" onclick={onSubmitJudgement} disabled={submitting}>
+			{#if submitting}
+				Submitting...
+			{:else}
+				Submit Judgment
+			{/if}
+		</Button>
+
+		<Button
+			variant="destructive"
+			type="reset"
+			class="w-full"
+			onclick={() => judgement.clear()}
+			disabled={submitting}
 		>
+			Reset
+		</Button>
 	</CardContent>
 </Card>
