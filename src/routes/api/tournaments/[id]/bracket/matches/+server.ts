@@ -1,7 +1,7 @@
 import { db } from '$lib/server/db/client';
-import { brackets, nodes, participants } from '$lib/server/db/schema';
+import { activeBattles, brackets, nodes, participants } from '$lib/server/db/schema';
 import { json } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 export async function GET({ params }) {
 	const tournamentId = params.id;
@@ -11,6 +11,22 @@ export async function GET({ params }) {
 	}
 
 	try {
+		const battleStatus = db
+			.select({
+				matchId: activeBattles.matchId,
+				complete: sql<boolean>`
+					COUNT(*) = 2
+					AND SUM(
+						CASE
+							WHEN ${activeBattles.leadStatus} = -1 THEN 1
+							ELSE 0
+						END
+					) = 2`.as('complete')
+			})
+			.from(activeBattles)
+			.groupBy(activeBattles.matchId)
+			.as('battle_status');
+
 		const rows = db
 			.select({
 				matchId: nodes.matchId,
@@ -20,10 +36,12 @@ export async function GET({ params }) {
 				winnerId: nodes.winnerId,
 				challongeParticipantId: participants.challongeParticipantId,
 				participantId: participants.id,
-				score: nodes.score
+				score: nodes.score,
+				bothRunFinished: sql<boolean>`COALESCE(${battleStatus.complete}, 1)`
 			})
 			.from(nodes)
 			.innerJoin(brackets, eq(nodes.bracketId, brackets.id))
+			.leftJoin(battleStatus, eq(battleStatus.matchId, nodes.matchId))
 			.leftJoin(participants, eq(participants.id, nodes.participantId))
 			.where(eq(brackets.tournamentId, tournamentId))
 			.all();

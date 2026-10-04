@@ -26,6 +26,7 @@ export type Match = {
 	participantId: string | null;
 	challongeParticipantId: string | null;
 	score: number;
+	bothRunFinished: number;
 };
 
 export type GroupedMatches = Match[][][];

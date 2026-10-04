@@ -143,6 +143,10 @@ export async function GET({ params, fetch }) {
 						continue;
 					}
 
+					if (p1.status === 'complete' || p2.status === 'complete') {
+						continue;
+					}
+
 					const p1Entrant = tx
 						.select({
 							score: entrants.score

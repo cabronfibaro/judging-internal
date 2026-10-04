@@ -264,67 +264,70 @@
 									{#if selectedMatchId !== currentMatch.matchId && currentMatch.status !== 'complete'}
 										<Button onclick={() => onStartMatch(match)}>Load</Button>
 									{/if}
-									{#if selectedMatchId === currentMatch.matchId}
-										<AlertDialog bind:open={omtDialogOpen}>
-											<AlertDialogTrigger>
-												<Button variant="outline" disabled={isProcessing}>OMT</Button>
-											</AlertDialogTrigger>
 
-											<AlertDialogContent>
-												<AlertDialogHeader>
-													<AlertDialogTitle>Start OMT?</AlertDialogTitle>
-													<AlertDialogDescription>
-														This will reset the battle and start an OMT. Are you sure you want to
-														continue?
-													</AlertDialogDescription>
-												</AlertDialogHeader>
+									{#if currentMatch.bothRunFinished}
+										{#if selectedMatchId === currentMatch.matchId}
+											<AlertDialog bind:open={omtDialogOpen}>
+												<AlertDialogTrigger>
+													<Button variant="outline" disabled={isProcessing}>OMT</Button>
+												</AlertDialogTrigger>
 
-												<AlertDialogFooter>
-													<AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+												<AlertDialogContent>
+													<AlertDialogHeader>
+														<AlertDialogTitle>Start OMT?</AlertDialogTitle>
+														<AlertDialogDescription>
+															This will reset the battle and start an OMT. Are you sure you want to
+															continue?
+														</AlertDialogDescription>
+													</AlertDialogHeader>
 
-													<AlertDialogAction
-														disabled={isProcessing}
-														onclick={() => handleOMT(match)}
-													>
-														{#if isProcessing}
-															Processing...
-														{:else}
-															Continue
-														{/if}
-													</AlertDialogAction>
-												</AlertDialogFooter>
-											</AlertDialogContent>
-										</AlertDialog>
+													<AlertDialogFooter>
+														<AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
 
-										<AlertDialog bind:open={concludeDialogOpen}>
-											<AlertDialogTrigger>
-												<Button variant="outline" disabled={isProcessing}>Conclude</Button>
-											</AlertDialogTrigger>
+														<AlertDialogAction
+															disabled={isProcessing}
+															onclick={() => handleOMT(match)}
+														>
+															{#if isProcessing}
+																Processing...
+															{:else}
+																Continue
+															{/if}
+														</AlertDialogAction>
+													</AlertDialogFooter>
+												</AlertDialogContent>
+											</AlertDialog>
 
-											<AlertDialogContent>
-												<AlertDialogHeader>
-													<AlertDialogTitle>Conclude match?</AlertDialogTitle>
-													<AlertDialogDescription>
-														This will finalize the result of this match. Are you sure?
-													</AlertDialogDescription>
-												</AlertDialogHeader>
+											<AlertDialog bind:open={concludeDialogOpen}>
+												<AlertDialogTrigger>
+													<Button variant="outline" disabled={isProcessing}>Conclude</Button>
+												</AlertDialogTrigger>
 
-												<AlertDialogFooter>
-													<AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+												<AlertDialogContent>
+													<AlertDialogHeader>
+														<AlertDialogTitle>Conclude match?</AlertDialogTitle>
+														<AlertDialogDescription>
+															This will finalize the result of this match. Are you sure?
+														</AlertDialogDescription>
+													</AlertDialogHeader>
 
-													<AlertDialogAction
-														disabled={isProcessing}
-														onclick={() => handleConclude()}
-													>
-														{#if isProcessing}
-															Processing...
-														{:else}
-															Conclude
-														{/if}
-													</AlertDialogAction>
-												</AlertDialogFooter>
-											</AlertDialogContent>
-										</AlertDialog>
+													<AlertDialogFooter>
+														<AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+
+														<AlertDialogAction
+															disabled={isProcessing}
+															onclick={() => handleConclude()}
+														>
+															{#if isProcessing}
+																Processing...
+															{:else}
+																Conclude
+															{/if}
+														</AlertDialogAction>
+													</AlertDialogFooter>
+												</AlertDialogContent>
+											</AlertDialog>
+										{/if}
 									{/if}
 								</div>
 							</CardContent>
