@@ -6,6 +6,7 @@ import { db } from '$lib/server/db/client';
 import { snakeCase } from 'es-toolkit';
 import { getJson } from '$lib/utils.js';
 import type { GroupedMatches } from '../../../types/tournament.js';
+import { and } from 'drizzle-orm';
 
 export async function GET({ fetch }) {
 	try {
@@ -195,7 +196,12 @@ export async function POST({ request }) {
 				const existingParticipant = tx
 					.select()
 					.from(participants)
-					.where(eq(participants.name, participantName))
+					.where(
+						and(
+							eq(participants.name, participantName),
+							eq(participants.tournamentId, createdTournament.id)
+						)
+					)
 					.limit(1)
 					.all();
 
