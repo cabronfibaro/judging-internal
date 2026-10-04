@@ -87,6 +87,7 @@
 	async function onSubmitJudgement() {
 		if (submitting) return;
 
+		judgement.processing = true;
 		submitting = true;
 
 		try {
@@ -97,6 +98,7 @@
 			judgement.clear();
 		} finally {
 			submitting = false;
+			judgement.processing = false;
 		}
 	}
 

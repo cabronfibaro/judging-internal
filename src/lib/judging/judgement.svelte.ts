@@ -4,6 +4,7 @@ type Result = {
 };
 
 class Judgement {
+	processing = $state(false);
 	results: Record<string, Result> = $state({});
 
 	set(id: string, state: keyof Result, value: number) {
