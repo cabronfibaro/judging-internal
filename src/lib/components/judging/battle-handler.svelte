@@ -1,14 +1,14 @@
 <script lang="ts">
-	import type { Judgement } from '$lib/judging/judgement.svelte';
+	import type { Judgement } from '#lib/judging/judgement.svelte';
 	import Button from '../ui/button/button.svelte';
 	import CardContent from '../ui/card/card-content.svelte';
 	import CardHeader from '../ui/card/card-header.svelte';
 	import CardTitle from '../ui/card/card-title.svelte';
 	import Card from '../ui/card/card.svelte';
 	import DebugJudgement from './debug-judgement.svelte';
-	import type { Stage } from '$lib/judging/stage.svelte';
+	import type { Stage } from '#lib/judging/stage.svelte';
 	import { useQueryClient } from '@tanstack/svelte-query';
-	import { getJson } from '$lib/utils';
+	import { getJson } from '#lib/utils';
 
 	let {
 		judgement,

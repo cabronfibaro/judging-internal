@@ -1,6 +1,6 @@
-import { CHALLONGE_API_KEY } from '$env/static/private';
-import { db } from '$lib/server/db/client.js';
-import { brackets } from '$lib/server/db/schema.js';
+import { CHALLONGE_API_KEY } from '$app/env/private';
+import { db } from '#lib/server/db/client.js';
+import { brackets } from '#lib/server/db/schema.js';
 import { json } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 

@@ -1,7 +1,7 @@
-import { db } from '$lib/server/db/client';
-import { entrants, tournaments, participants, brackets } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/client';
+import { entrants, tournaments, participants, brackets } from '#lib/server/db/schema';
 import { json } from '@sveltejs/kit';
-import { CHALLONGE_API_KEY } from '$env/static/private';
+import { CHALLONGE_API_KEY } from '$app/env/private';
 import { and, eq, inArray } from 'drizzle-orm';
 
 export async function GET({ params }) {

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Criteriacontrol from './criteria-control.svelte';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Separator } from '$lib/components/ui/separator';
+	import { Badge } from '#lib/components/ui/badge';
+	import { Card, CardContent, CardHeader, CardTitle } from '#lib/components/ui/card';
+	import { Separator } from '#lib/components/ui/separator';
 	import type { CriteriaCatrgory } from '../../../types';
-	import type { Judgement } from '$lib/judging/judgement.svelte';
+	import type { Judgement } from '#lib/judging/judgement.svelte';
 
 	let {
 		category,

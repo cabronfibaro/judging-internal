@@ -2,16 +2,16 @@
 	import type { CriteriaCatrgory } from '../../../types';
 	import CommoncriteriaCard from './commoncriteria-card.svelte';
 	import CriteriaCard from './criteria-card.svelte';
-	import type { Judgement } from '$lib/judging/judgement.svelte';
+	import type { Judgement } from '#lib/judging/judgement.svelte';
 	import type { Snippet } from 'svelte';
-	import type { Stage } from '$lib/judging/stage.svelte';
+	import type { Stage } from '#lib/judging/stage.svelte';
 
-	import Empty from '$lib/components/ui/empty/empty.svelte';
-	import EmptyHeader from '$lib/components/ui/empty/empty-header.svelte';
-	import EmptyMedia from '$lib/components/ui/empty/empty-media.svelte';
-	import EmptyTitle from '$lib/components/ui/empty/empty-title.svelte';
-	import EmptyDescription from '$lib/components/ui/empty/empty-description.svelte';
-	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
+	import Empty from '#lib/components/ui/empty/empty.svelte';
+	import EmptyHeader from '#lib/components/ui/empty/empty-header.svelte';
+	import EmptyMedia from '#lib/components/ui/empty/empty-media.svelte';
+	import EmptyTitle from '#lib/components/ui/empty/empty-title.svelte';
+	import EmptyDescription from '#lib/components/ui/empty/empty-description.svelte';
+	import Spinner from '#lib/components/ui/spinner/spinner.svelte';
 
 	let {
 		judgement,

@@ -1,5 +1,5 @@
-import { db } from '$lib/server/db/client';
-import { activeBattles, brackets, nodes } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/client';
+import { activeBattles, brackets, nodes } from '#lib/server/db/schema';
 import { json } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 

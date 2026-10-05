@@ -1,8 +1,8 @@
 <script lang="ts">
 	/* eslint-disable svelte/require-each-key */
-	import { Badge } from '$lib/components/ui/badge';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
+	import { Badge } from '#lib/components/ui/badge';
+	import { Card, CardContent, CardHeader, CardTitle } from '#lib/components/ui/card';
+	import { Tabs, TabsContent, TabsList, TabsTrigger } from '#lib/components/ui/tabs';
 	import {
 		AlertDialog,
 		AlertDialogAction,
@@ -13,14 +13,14 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 		AlertDialogTrigger
-	} from '$lib/components/ui/alert-dialog';
+	} from '#lib/components/ui/alert-dialog';
 	import { capitalize } from 'es-toolkit/string';
 	import type { GroupedMatches, Match } from '../../../types/tournament';
-	import { Stage } from '$lib/judging/stage.svelte';
-	import type { Judgement } from '$lib/judging/judgement.svelte';
+	import { Stage } from '#lib/judging/stage.svelte';
+	import type { Judgement } from '#lib/judging/judgement.svelte';
 	import Button from '../ui/button/button.svelte';
-	import { syncTournament, type Battles } from '$lib/api/tournaments';
-	import { getJson } from '$lib/utils';
+	import { syncTournament, type Battles } from '#lib/api/tournaments';
+	import { getJson } from '#lib/utils';
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	let {

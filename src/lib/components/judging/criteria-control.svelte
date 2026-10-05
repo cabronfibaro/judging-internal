@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
+	import { Button } from '#lib/components/ui/button';
+	import { Input } from '#lib/components/ui/input';
 	import {
 		Select,
 		SelectContent,
 		SelectItem,
 		SelectTrigger,
 		SelectValue
-	} from '$lib/components/ui/select';
+	} from '#lib/components/ui/select';
 	import type { Tag } from '../../../types';
 	import Switch from '../ui/switch/switch.svelte';
 

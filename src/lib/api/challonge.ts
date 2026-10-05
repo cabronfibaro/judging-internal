@@ -1,4 +1,4 @@
-import { getJson } from '$lib/utils';
+import { getJson } from '#lib/utils';
 
 export interface ParticipantReference {
 	data: {

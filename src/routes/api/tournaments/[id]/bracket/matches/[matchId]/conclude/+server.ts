@@ -1,6 +1,6 @@
-import { db } from '$lib/server/db/client';
-import { activeBattles, brackets, nodes, participants } from '$lib/server/db/schema';
-import { CHALLONGE_API_KEY } from '$env/static/private';
+import { db } from '#lib/server/db/client';
+import { activeBattles, brackets, nodes, participants } from '#lib/server/db/schema';
+import { CHALLONGE_API_KEY } from '$app/env/private';
 import { json } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 

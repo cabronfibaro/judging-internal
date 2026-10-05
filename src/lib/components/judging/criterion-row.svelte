@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Criteriacontrol from './criteria-control.svelte';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Separator } from '$lib/components/ui/separator';
+	import { Badge } from '#lib/components/ui/badge';
+	import { Separator } from '#lib/components/ui/separator';
 	import type { Tag } from '../../../types';
 
 	let {

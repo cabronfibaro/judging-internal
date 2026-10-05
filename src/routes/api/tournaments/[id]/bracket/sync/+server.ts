@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { db } from '$lib/server/db/client';
+import { db } from '#lib/server/db/client';
 import {
 	activeBattles,
 	brackets,
@@ -7,13 +7,13 @@ import {
 	nodes,
 	participants,
 	type Node
-} from '$lib/server/db/schema';
+} from '#lib/server/db/schema';
 import { json } from '@sveltejs/kit';
 import { and, eq, inArray } from 'drizzle-orm';
-import { getJson } from '$lib/utils.js';
+import { getJson } from '#lib/utils.js';
 import type { GroupedMatches } from '../../../../../../types/tournament.js';
-import { getChallongeMatches } from '$lib/api/challonge.js';
-import { CHALLONGE_API_KEY } from '$env/static/private';
+import { getChallongeMatches } from '#lib/api/challonge.js';
+import { CHALLONGE_API_KEY } from '$app/env/private';
 
 export async function GET({ params, fetch }) {
 	const tournamentId = params.id;

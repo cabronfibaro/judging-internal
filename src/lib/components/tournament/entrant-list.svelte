@@ -1,16 +1,16 @@
 <script lang="ts">
 	import EllipsisVertical from '@lucide/svelte/icons/ellipsis-vertical';
-	import { Badge } from '$lib/components/ui/badge';
+	import { Badge } from '#lib/components/ui/badge';
 	import {
 		DropdownMenu,
 		DropdownMenuContent,
 		DropdownMenuItem,
 		DropdownMenuTrigger
-	} from '$lib/components/ui/dropdown-menu';
-	import { Button } from '$lib/components/ui/button';
+	} from '#lib/components/ui/dropdown-menu';
+	import { Button } from '#lib/components/ui/button';
 	import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 	import type { Entrant, Tournament } from '../../../types/tournament';
-	import { startTournament, syncTournament, updateTournament } from '$lib/api/tournaments';
+	import { startTournament, syncTournament, updateTournament } from '#lib/api/tournaments';
 	import AlertDialog from '../ui/alert-dialog/alert-dialog.svelte';
 	import AlertDialogTrigger from '../ui/alert-dialog/alert-dialog-trigger.svelte';
 	import AlertDialogContent from '../ui/alert-dialog/alert-dialog-content.svelte';

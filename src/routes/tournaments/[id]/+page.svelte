@@ -1,15 +1,15 @@
 <script lang="ts">
-	import StageCard from '$lib/components/judging/stage-card.svelte';
+	import StageCard from '#lib/components/judging/stage-card.svelte';
 	import { createQuery } from '@tanstack/svelte-query';
 	import type { Tournament } from '../../../types/tournament.js';
-	import { getActiveBattles, getEntrants, getMatches } from '$lib/api/tournaments.js';
-	import EntrantList from '$lib/components/tournament/entrant-list.svelte';
-	import Matches from '$lib/components/tournament/matches.svelte';
-	import Panel from '$lib/components/judging/panel.svelte';
-	import { Judgement } from '$lib/judging/judgement.svelte.js';
-	import { Stage } from '$lib/judging/stage.svelte.js';
-	import QualifyingHandler from '$lib/components/judging/qualifying-handler.svelte';
-	import BattleHandler from '$lib/components/judging/battle-handler.svelte';
+	import { getActiveBattles, getEntrants, getMatches } from '#lib/api/tournaments.js';
+	import EntrantList from '#lib/components/tournament/entrant-list.svelte';
+	import Matches from '#lib/components/tournament/matches.svelte';
+	import Panel from '#lib/components/judging/panel.svelte';
+	import { Judgement } from '#lib/judging/judgement.svelte.js';
+	import { Stage } from '#lib/judging/stage.svelte.js';
+	import QualifyingHandler from '#lib/components/judging/qualifying-handler.svelte';
+	import BattleHandler from '#lib/components/judging/battle-handler.svelte';
 
 	let { data } = $props();
 	const criteriaConfig = $derived(data.criteriaConfig);

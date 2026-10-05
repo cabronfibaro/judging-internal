@@ -1,4 +1,4 @@
-import { getJson } from '$lib/utils';
+import { getJson } from '#lib/utils';
 import type { Entrant, GroupedMatches, Tournament } from '../../types/tournament';
 
 export async function getEntrants(

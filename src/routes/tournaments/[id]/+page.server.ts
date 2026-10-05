@@ -1,5 +1,5 @@
-import { getEntrants, syncTournament, type Battles } from '$lib/api/tournaments.js';
-import { getJson } from '$lib/utils';
+import { getEntrants, syncTournament, type Battles } from '#lib/api/tournaments.js';
+import { getJson } from '#lib/utils';
 import type { CriteriaCatrgory } from '../../../types/index.js';
 import type { GroupedMatches, Tournament } from '../../../types/tournament';
 
@@ -8,7 +8,11 @@ type CriteriaConfig = {
 	categories: Record<string, CriteriaCatrgory>;
 };
 
-export async function load({ fetch, params }) {
+export async function load({ fetch, params, url }) {
+	console.log('URL:', url.href);
+	console.log('ORIGIN:', url.origin);
+	console.log('PROTOCOL:', url.protocol);
+	console.log('HOST:', url.host);
 	const id = params.id;
 
 	const [tournament, entrants, criteriaConfig] = await Promise.all([

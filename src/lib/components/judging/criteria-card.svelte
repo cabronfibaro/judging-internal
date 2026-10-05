@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import type { Judgement } from '$lib/judging/judgement.svelte';
+	import { Card, CardContent, CardHeader, CardTitle } from '#lib/components/ui/card';
+	import type { Judgement } from '#lib/judging/judgement.svelte';
 	import type { CriteriaCatrgory } from '../../../types';
 	import Separator from '../ui/separator/separator.svelte';
 	import CriterionRow from './criterion-row.svelte';

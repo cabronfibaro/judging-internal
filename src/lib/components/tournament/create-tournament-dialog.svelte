@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 
-	import { Button } from '$lib/components/ui/button';
+	import { Button } from '#lib/components/ui/button';
 	import {
 		Dialog,
 		DialogContent,
@@ -10,10 +10,10 @@
 		DialogHeader,
 		DialogTitle,
 		DialogTrigger
-	} from '$lib/components/ui/dialog';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Textarea } from '$lib/components/ui/textarea';
+	} from '#lib/components/ui/dialog';
+	import { Input } from '#lib/components/ui/input';
+	import { Label } from '#lib/components/ui/label';
+	import { Textarea } from '#lib/components/ui/textarea';
 	import Switch from '../ui/switch/switch.svelte';
 
 	let open = $state(false);
@@ -124,7 +124,9 @@
 
 <Dialog bind:open>
 	<DialogTrigger>
-		<Button>Create Tournament</Button>
+		{#snippet child({ props })}
+			<Button {...props}>Delete</Button>
+		{/snippet}
 	</DialogTrigger>
 
 	<DialogContent>

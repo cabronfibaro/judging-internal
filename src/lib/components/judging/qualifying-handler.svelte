@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Judgement } from '$lib/judging/judgement.svelte';
+	import type { Judgement } from '#lib/judging/judgement.svelte';
 	import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 	import Button from '../ui/button/button.svelte';
 	import CardContent from '../ui/card/card-content.svelte';
@@ -7,7 +7,7 @@
 	import CardTitle from '../ui/card/card-title.svelte';
 	import Card from '../ui/card/card.svelte';
 	import DebugJudgement from './debug-judgement.svelte';
-	import { updateTournament } from '$lib/api/tournaments';
+	import { updateTournament } from '#lib/api/tournaments';
 	import type { Entrant, Tournament } from '../../../types/tournament';
 
 	let {

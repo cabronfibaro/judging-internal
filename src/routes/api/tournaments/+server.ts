@@ -1,10 +1,10 @@
 import { json } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
-import { CHALLONGE_API_KEY } from '$env/static/private';
-import { participants, entrants, tournaments, tracks, brackets } from '$lib/server/db/schema';
-import { db } from '$lib/server/db/client';
+import { CHALLONGE_API_KEY } from '$app/env/private';
+import { participants, entrants, tournaments, tracks, brackets } from '#lib/server/db/schema';
+import { db } from '#lib/server/db/client';
 import { snakeCase } from 'es-toolkit';
-import { getJson } from '$lib/utils.js';
+import { getJson } from '#lib/utils.js';
 import type { GroupedMatches } from '../../../types/tournament.js';
 import { and } from 'drizzle-orm';
 

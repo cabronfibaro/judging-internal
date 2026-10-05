@@ -1,5 +1,5 @@
-import { db } from '$lib/server/db/client';
-import { participants, entrants } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/client';
+import { participants, entrants } from '#lib/server/db/schema';
 import { json } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
 
-	import { Button } from '$lib/components/ui/button';
+	import { Button } from '#lib/components/ui/button';
 	import {
 		Dialog,
 		DialogContent,
@@ -9,11 +9,11 @@
 		DialogFooter,
 		DialogHeader,
 		DialogTitle
-	} from '$lib/components/ui/dialog';
+	} from '#lib/components/ui/dialog';
 
 	import type { Tournament } from '../../../types/tournament';
 
-	import { deleteTournament, getTournaments } from '$lib/api/tournaments';
+	import { deleteTournament, getTournaments } from '#lib/api/tournaments';
 	import TournamentCardSkel from './tournament-card-skel.svelte';
 	import TournamentCard from './tournament-card.svelte';
 

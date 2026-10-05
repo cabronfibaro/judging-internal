@@ -2,8 +2,8 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import './layout.css';
-	import Main from '$lib/components/layout/main.svelte';
-	import { browser } from '$app/environment';
+	import Main from '#lib/components/layout/main.svelte';
+	import { browser } from '$app/env';
 
 	let { children } = $props();
 	const queryClient = new QueryClient({

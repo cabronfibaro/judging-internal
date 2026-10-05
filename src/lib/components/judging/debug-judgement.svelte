@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Judgement } from '$lib/judging/judgement.svelte';
+	import type { Judgement } from '#lib/judging/judgement.svelte';
 	let {
 		results,
 		show = false
