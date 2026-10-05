@@ -14,7 +14,7 @@ export default defineConfig({
 			},
 			adapter: adapter(),
 			paths: {
-				origin: 'http://localhost:3000'
+				origin: 'http://127.0.0.1:3000'
 			}
 		})
 	]
