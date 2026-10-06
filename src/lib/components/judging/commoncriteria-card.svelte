@@ -91,7 +91,7 @@
 				</div>
 
 				<!-- Lead -->
-				<div class="flex items-center justify-between gap-3 md:w-36 md:justify-self-end">
+				<div class="flex items-center justify-between gap-3 md:flex-row">
 					<span class="text-xs font-medium tracking-wide text-muted-foreground uppercase md:hidden"
 						>Lead</span
 					>
@@ -104,7 +104,7 @@
 
 				{#if !isQualifying}
 					<!-- Chase -->
-					<div class="flex items-center justify-between gap-3 md:w-36 md:justify-self-end">
+					<div class="flex items-center justify-between gap-3">
 						<span
 							class="text-xs font-medium tracking-wide text-muted-foreground uppercase md:hidden"
 							>Chase</span

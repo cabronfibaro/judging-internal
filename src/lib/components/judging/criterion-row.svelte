@@ -27,10 +27,12 @@
 	<Separator />
 {/if}
 
-<div class="flex flex-col items-stretch gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+<div
+	class="flex flex-col items-stretch gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+>
 	<div class="min-w-0">
 		<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-			<span class="text-sm font-medium leading-5">
+			<span class="text-sm leading-5 font-medium">
 				{tag.label}
 			</span>
 

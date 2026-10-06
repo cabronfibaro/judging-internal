@@ -36,7 +36,7 @@
           "type": "neutral",
           "value_type": "dynamic",
           "max": 30,
-          "multiplier": 6
+          "multiplier": 7.5
         },
         {
           "id": "lead_angle",

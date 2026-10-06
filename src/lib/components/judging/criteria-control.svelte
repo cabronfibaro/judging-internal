@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { Button } from '#lib/components/ui/button';
-	import { Input } from '#lib/components/ui/input';
 	import {
 		Select,
 		SelectContent,
@@ -9,6 +7,7 @@
 		SelectValue
 	} from '#lib/components/ui/select';
 	import type { Tag } from '../../../types';
+	import Slider from '../ui/slider/slider.svelte';
 	import Switch from '../ui/switch/switch.svelte';
 
 	let {
@@ -20,45 +19,6 @@
 		value?: unknown;
 		onValueChange: (value: unknown) => void;
 	} = $props();
-
-	function changeValue(amount: number, crit_type: (typeof tag)['type']) {
-		const current = Number(value ?? 0);
-
-		let multiplier = 1;
-		if (tag.multiplier) {
-			multiplier = tag.multiplier;
-		}
-
-		amount = amount * multiplier;
-		const final_amount = crit_type === 'deduction' ? -amount : amount;
-		onValueChange(current + final_amount);
-	}
-
-	let holdInterval: ReturnType<typeof setInterval> | undefined;
-	let holdDelay = 150;
-
-	function startHold(amount: number, crit_type: (typeof tag)['type']) {
-		changeValue(amount, crit_type);
-
-		holdDelay = 150;
-
-		function tick() {
-			changeValue(amount, crit_type);
-
-			holdDelay = Math.max(30, holdDelay - 10);
-
-			holdInterval = setTimeout(tick, holdDelay);
-		}
-
-		holdInterval = setTimeout(tick, holdDelay);
-	}
-
-	function stopHold() {
-		if (holdInterval) {
-			clearTimeout(holdInterval);
-			holdInterval = undefined;
-		}
-	}
 </script>
 
 {#if tag.value_type === 'enum'}
@@ -76,52 +36,26 @@
 		</SelectContent>
 	</Select>
 {:else if tag.value_type === 'dynamic'}
-	<div class="flex justify-end sm:justify-center">
-		<Button
-			variant="outline"
-			size="icon"
-			class="h-9 w-9 rounded-r-none focus-visible:z-10"
-			aria-label="Decrease {tag.label}"
-			onclick={(event) => {
-				if (event.detail === 0) changeValue(-1, tag.type);
-			}}
-			onpointerdown={() => startHold(-1, tag.type)}
-			onpointerup={stopHold}
-			onpointerleave={stopHold}
-			onpointercancel={stopHold}
-			disabled={Math.abs(Number(value ?? 0)) <= 0}
-		>
-			−
-		</Button>
+	<div class="flex items-center justify-end gap-3 sm:justify-center">
+		<Slider
+			type="single"
+			value={Math.abs(Number(value ?? 0)) / (tag.multiplier ?? 1)}
+			min={0}
+			max={tag.max !== undefined ? tag.max / (tag.multiplier ?? 1) : 100}
+			step={1}
+			aria-label={tag.label}
+			onValueChange={(value) => {
+				const multiplier = tag.multiplier ?? 1;
+				const amount = value * multiplier;
 
-		<Input
-			autocomplete="off"
-			class="h-9 w-12 rounded-none text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-			type="number"
-			disabled
-			aria-label="{tag.label} score"
-			value={Math.abs(Number(value ?? 0))}
-			oninput={(event) => {
-				onValueChange(Math.max(0, Number(event.currentTarget.value)));
+				onValueChange(tag.type === 'deduction' ? -amount : amount);
 			}}
+			class="w-full sm:w-36"
 		/>
 
-		<Button
-			variant="outline"
-			size="icon"
-			class="h-9 w-9 rounded-l-none focus-visible:z-10"
-			aria-label="Increase {tag.label}"
-			onclick={(event) => {
-				if (event.detail === 0) changeValue(1, tag.type);
-			}}
-			onpointerdown={() => startHold(1, tag.type)}
-			onpointerup={stopHold}
-			onpointerleave={stopHold}
-			onpointercancel={stopHold}
-			disabled={tag.max !== undefined && Math.abs(Number(value)) >= tag.max}
-		>
-			+
-		</Button>
+		<!-- <span class="w-8 shrink-0 text-right text-sm tabular-nums">
+			{Math.abs(Number(value ?? 0)) / (tag.multiplier ?? 1)}
+		</span> -->
 	</div>
 {:else if tag.value_type === 'switch'}
 	<Switch
