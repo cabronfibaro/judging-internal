@@ -63,7 +63,7 @@
 
 {#if tag.value_type === 'enum'}
 	<Select type="single" onValueChange={(selected) => onValueChange(Number(selected))}>
-		<SelectTrigger>
+		<SelectTrigger class="w-full sm:w-36" aria-label={tag.label}>
 			<SelectValue placeholder="Select" />
 		</SelectTrigger>
 
@@ -76,11 +76,15 @@
 		</SelectContent>
 	</Select>
 {:else if tag.value_type === 'dynamic'}
-	<div class="flex justify-center">
+	<div class="flex justify-end sm:justify-center">
 		<Button
 			variant="outline"
 			size="icon"
-			class="h-9 w-9 rounded-r-none"
+			class="h-9 w-9 rounded-r-none focus-visible:z-10"
+			aria-label="Decrease {tag.label}"
+			onclick={(event) => {
+				if (event.detail === 0) changeValue(-1, tag.type);
+			}}
 			onpointerdown={() => startHold(-1, tag.type)}
 			onpointerup={stopHold}
 			onpointerleave={stopHold}
@@ -92,9 +96,10 @@
 
 		<Input
 			autocomplete="off"
-			class="h-9 w-12 [appearance:textfield] rounded-none text-center [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+			class="h-9 w-12 rounded-none text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 			type="number"
 			disabled
+			aria-label="{tag.label} score"
 			value={Math.abs(Number(value ?? 0))}
 			oninput={(event) => {
 				onValueChange(Math.max(0, Number(event.currentTarget.value)));
@@ -104,7 +109,11 @@
 		<Button
 			variant="outline"
 			size="icon"
-			class="h-9 w-9 rounded-l-none"
+			class="h-9 w-9 rounded-l-none focus-visible:z-10"
+			aria-label="Increase {tag.label}"
+			onclick={(event) => {
+				if (event.detail === 0) changeValue(1, tag.type);
+			}}
 			onpointerdown={() => startHold(1, tag.type)}
 			onpointerup={stopHold}
 			onpointerleave={stopHold}
@@ -116,6 +125,7 @@
 	</div>
 {:else if tag.value_type === 'switch'}
 	<Switch
+		aria-label={tag.label}
 		checked={Number(value ?? 0) !== 0}
 		onCheckedChange={(checked) => {
 			const amount = Number(tag.default_value ?? 0);

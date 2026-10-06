@@ -1,59 +1,129 @@
 <script lang="ts">
-	import type { Tournament } from '../../../types/tournament';
+	import CalendarDays from '@lucide/svelte/icons/calendar-days';
+	import ExternalLink from '@lucide/svelte/icons/external-link';
+	import Flag from '@lucide/svelte/icons/flag';
+	import GitBranch from '@lucide/svelte/icons/git-branch';
+	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
+	import { Badge } from '#lib/components/ui/badge';
 	import Button from '../ui/button/button.svelte';
-	import CardContent from '../ui/card/card-content.svelte';
-	import CardHeader from '../ui/card/card-header.svelte';
-	import CardTitle from '../ui/card/card-title.svelte';
 	import Card from '../ui/card/card.svelte';
+	import CardContent from '../ui/card/card-content.svelte';
 	import Progress from '../ui/progress/progress.svelte';
-	import Skeleton from '../ui/skeleton/skeleton.svelte';
+	import type { Tournament } from '../../../types/tournament';
 
 	let {
 		tournament,
-		openDeleteDialog
-	}: { tournament: Tournament; openDeleteDialog(tournament: Tournament): void } = $props();
+		openDeleteDialog,
+		position
+	}: {
+		tournament: Tournament;
+		openDeleteDialog(tournament: Tournament): void;
+		position: number;
+	} = $props();
+
+	const isQualifying = $derived(tournament.status === 'qualifying');
+	const progressPercent = $derived(Math.round(Math.max(0, Math.min(1, tournament.progress)) * 100));
+	const statusLabel = $derived(isQualifying ? 'Qualifying' : 'Elimination');
+	const progressLabel = $derived(
+		progressPercent === 0
+			? 'Not started'
+			: progressPercent === 100
+				? 'Complete'
+				: `${progressPercent}% complete`
+	);
+
+	function formatDate(value: Tournament['startingDate']) {
+		const date = new Date(value);
+		if (Number.isNaN(date.getTime())) return 'Date unavailable';
+
+		return new Intl.DateTimeFormat(undefined, {
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric',
+			hour: 'numeric',
+			minute: '2-digit'
+		}).format(date);
+	}
 </script>
 
-<Card>
-	<CardHeader>
-		<CardTitle>
-			{tournament.name} ({tournament.status === 'qualifying' ? 'Qualifying' : 'Elimination'})
-		</CardTitle>
-	</CardHeader>
+<Card
+	class="group w-full overflow-hidden border-border/80 py-0 transition-colors hover:border-foreground/20"
+>
+	<CardContent class="p-0">
+		<div class="grid w-full lg:grid-cols-[minmax(0,1fr)_18rem]">
+			<div class="min-w-0 space-y-3 p-3 sm:p-4 lg:pr-6">
+				<div class="flex min-w-0 items-center gap-3">
+					<div
+						class="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted/40 text-sm font-semibold text-muted-foreground tabular-nums"
+						aria-label={`Tournament ${position}`}
+					>
+						{String(position).padStart(2, '0')}
+					</div>
 
-	<CardContent class="space-y-4">
-		<Skeleton class="aspect-video w-full animate-none rounded-md" />
+					<div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+						<h2 class="min-w-0 flex-1 truncate text-base font-semibold tracking-tight sm:text-lg">
+							{tournament.name}
+						</h2>
+						<Badge variant={isQualifying ? 'secondary' : 'default'}>
+							{statusLabel}
+						</Badge>
+					</div>
+				</div>
 
-		<div class="flex flex-col gap-4 space-y-1 text-sm">
-			<div>
-				<p>
-					<span class="text-muted-foreground">Track:</span>
-					{tournament.track ?? 'Unknown'}
-				</p>
-
-				<p>
-					<span class="text-muted-foreground">Starting:</span>
-					{new Date(tournament.startingDate).toLocaleString()}
-				</p>
-
-				<p>
-					<span class="text-muted-foreground">Bracket:</span>
+				<div
+					class="flex flex-wrap items-center gap-x-6 gap-y-2 pl-12 text-sm text-muted-foreground"
+				>
+					<div class="flex min-w-0 items-center gap-2">
+						<Flag class="size-4 shrink-0" aria-hidden="true" />
+						<span class="truncate" title={tournament.track ?? 'Track unavailable'}>
+							{tournament.track ?? 'Track unavailable'}
+						</span>
+					</div>
+					<div class="flex min-w-0 items-center gap-2">
+						<CalendarDays class="size-4 shrink-0" aria-hidden="true" />
+						<span class="truncate">{formatDate(tournament.startingDate)}</span>
+					</div>
 					<a
 						href={`https://challonge.com/${tournament.url}`}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="text-primary underline underline-offset-4 hover:text-primary/80"
+						class="flex min-w-0 items-center gap-2 text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
+						aria-label={`Open Challonge bracket for ${tournament.name}`}
 					>
-						Link
+						<GitBranch class="size-4 shrink-0" aria-hidden="true" />
+						<span>Open bracket</span>
+						<ExternalLink class="size-3.5 shrink-0" aria-hidden="true" />
 					</a>
-				</p>
+				</div>
 			</div>
-			<Progress value={tournament.progress * 100} />
-		</div>
 
-		<div class="flex gap-2">
-			<Button href={`/tournaments/${tournament.id}`}>Load</Button>
-			<Button variant="destructive" onclick={() => openDeleteDialog(tournament)}>Delete</Button>
+			<div
+				class="flex min-w-0 flex-col gap-3 border-t border-border bg-muted/20 p-3 sm:p-4 lg:border-t-0 lg:border-l"
+			>
+				<div class="min-w-0 space-y-2">
+					<div class="flex items-center justify-between gap-3 text-xs">
+						<span class="font-medium text-muted-foreground">Progress</span>
+						<span class="text-foreground tabular-nums">{progressLabel}</span>
+					</div>
+					<Progress value={progressPercent} aria-label={`${tournament.name}: ${progressLabel}`} />
+				</div>
+
+				<div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+					<Button href={`/tournaments/${tournament.id}`} class="w-full">
+						Open tournament
+						<ArrowUpRight aria-hidden="true" />
+					</Button>
+					<Button
+						variant="ghost"
+						class="text-destructive hover:bg-destructive/10 hover:text-destructive"
+						onclick={() => openDeleteDialog(tournament)}
+					>
+						<Trash2 aria-hidden="true" />
+						Delete
+					</Button>
+				</div>
+			</div>
 		</div>
 	</CardContent>
 </Card>

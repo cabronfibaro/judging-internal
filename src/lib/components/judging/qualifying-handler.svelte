@@ -6,7 +6,6 @@
 	import CardHeader from '../ui/card/card-header.svelte';
 	import CardTitle from '../ui/card/card-title.svelte';
 	import Card from '../ui/card/card.svelte';
-	import DebugJudgement from './debug-judgement.svelte';
 	import { updateTournament } from '#lib/api/tournaments';
 	import type { Entrant, Tournament } from '../../../types/tournament';
 
@@ -23,6 +22,7 @@
 	const queryClient = useQueryClient();
 
 	let submitting = $state(false);
+	const currentScore = $derived(judgement.finalizedScore());
 
 	const updateTournamentMutation = createMutation(() => ({
 		mutationFn: async ({
@@ -125,15 +125,18 @@
 	}
 </script>
 
-<Card>
-	<CardHeader class="pb-3">
+<Card class="gap-0 border-border/70 shadow-none">
+	<CardHeader class="p-4">
 		<CardTitle>Judgement</CardTitle>
 	</CardHeader>
 
-	<CardContent class="space-y-3">
-		<DebugJudgement show results={judgement.results} />
+	<CardContent class="space-y-3 pt-0">
+		<div class="flex items-center justify-between gap-4 rounded-md border bg-muted/30 px-3 py-2.5">
+			<span class="text-sm font-medium text-muted-foreground">Current score</span>
+			<strong class="text-sm tabular-nums">{currentScore.lead}</strong>
+		</div>
 
-		<Button class="w-full" onclick={onSubmitJudgement} disabled={submitting}>
+		<Button class="h-11 w-full" onclick={onSubmitJudgement} disabled={submitting}>
 			{#if submitting}
 				Submitting...
 			{:else}
@@ -142,7 +145,7 @@
 		</Button>
 
 		<Button
-			variant="destructive"
+			variant="outline"
 			type="reset"
 			class="w-full"
 			onclick={() => judgement.clear()}

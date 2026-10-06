@@ -5,7 +5,6 @@
 	import CardHeader from '../ui/card/card-header.svelte';
 	import CardTitle from '../ui/card/card-title.svelte';
 	import Card from '../ui/card/card.svelte';
-	import DebugJudgement from './debug-judgement.svelte';
 	import type { Stage } from '#lib/judging/stage.svelte';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { getJson } from '#lib/utils';
@@ -20,6 +19,7 @@
 
 	const queryClient = useQueryClient();
 	let submitting = $state(false);
+	const currentScore = $derived(judgement.finalizedScore());
 
 	async function onSubmitJudgement() {
 		if (submitting) return;
@@ -77,15 +77,22 @@
 	}
 </script>
 
-<Card>
-	<CardHeader class="pb-3">
+<Card class="gap-0 border-border/70 shadow-none">
+	<CardHeader class="pb-4">
 		<CardTitle>Judgement</CardTitle>
 	</CardHeader>
 
-	<CardContent class="space-y-3">
-		<DebugJudgement show results={judgement.results} />
+	<CardContent class="space-y-3 pt-0">
+		<div class="flex items-center justify-between gap-4 rounded-md border bg-muted/30 px-3 py-2.5">
+			<span class="text-sm font-medium text-muted-foreground">Current score</span>
+			<div class="flex items-center gap-3 text-sm tabular-nums">
+				<span>Lead <strong>{currentScore.lead}</strong></span>
+				<span class="text-muted-foreground">/</span>
+				<span>Chase <strong>{currentScore.chase}</strong></span>
+			</div>
+		</div>
 
-		<Button class="w-full" onclick={onSubmitJudgement} disabled={submitting}>
+		<Button class="h-11 w-full" onclick={onSubmitJudgement} disabled={submitting}>
 			{#if submitting}
 				Submitting...
 			{:else}
@@ -94,7 +101,7 @@
 		</Button>
 
 		<Button
-			variant="destructive"
+			variant="outline"
 			type="reset"
 			class="w-full"
 			onclick={() => judgement.clear()}

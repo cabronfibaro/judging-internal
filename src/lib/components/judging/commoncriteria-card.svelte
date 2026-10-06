@@ -23,20 +23,29 @@
 	}
 </script>
 
-<Card class="col-span-2">
-	<CardHeader>
+<Card class="col-span-2 gap-0 border-border/70 shadow-none">
+	<CardHeader class="pb-4">
 		<CardTitle>{category.label}</CardTitle>
 	</CardHeader>
 	<Separator />
-	<CardContent class="space-y-3">
+	<CardContent class="space-y-1 pt-2">
 		<!-- Column headers -->
 
 		{#if !isQualifying}
-			<div class="grid grid-cols-[1fr_224px_224px] items-center gap-4 px-1">
+			<div
+				class="hidden grid-cols-[minmax(0,1fr)_10rem_10rem] items-center gap-4 px-1 pb-1 md:grid"
+			>
 				<div></div>
-				<div class="w-36 justify-self-end text-center text-sm font-medium">Lead</div>
-
-				<div class="w-36 justify-self-end text-center text-sm font-medium">Chase</div>
+				<div
+					class="w-36 justify-self-end text-center text-xs font-medium tracking-wide text-muted-foreground uppercase"
+				>
+					Lead
+				</div>
+				<div
+					class="w-36 justify-self-end text-center text-xs font-medium tracking-wide text-muted-foreground uppercase"
+				>
+					Chase
+				</div>
 			</div>
 		{/if}
 
@@ -46,13 +55,15 @@
 			{/if}
 
 			<div
-				class:grid-cols-[1fr_224px]={isQualifying}
-				class:grid-cols-[1fr_224px_224px]={!isQualifying}
-				class="grid items-center gap-4 py-2"
+				class={`grid gap-3 py-3 md:items-center md:gap-4 md:py-2 ${
+					isQualifying
+						? 'md:grid-cols-[minmax(0,1fr)_10rem]'
+						: 'md:grid-cols-[minmax(0,1fr)_10rem_10rem]'
+				}`}
 			>
 				<div class="min-w-0">
-					<div class="flex items-center gap-3">
-						<span class="truncate text-sm font-medium">
+					<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+						<span class="text-sm leading-5 font-medium">
 							{tag.label}
 						</span>
 
@@ -62,7 +73,7 @@
 									0) / (tag.multiplier ?? 1)}
 							</span>
 							{#if !isQualifying}
-								<span class="shrink-0 text-xs text-muted-foreground tabular-nums"> | </span>
+								<span class="shrink-0 text-xs text-muted-foreground md:hidden">•</span>
 								<span class="shrink-0 text-xs text-muted-foreground tabular-nums">
 									{Math.abs(
 										(judgement.get(tag.id)?.chase ?? 0) / (tag.multiplier ?? 1)
@@ -80,7 +91,10 @@
 				</div>
 
 				<!-- Lead -->
-				<div class="w-36 justify-self-end">
+				<div class="flex items-center justify-between gap-3 md:w-36 md:justify-self-end">
+					<span class="text-xs font-medium tracking-wide text-muted-foreground uppercase md:hidden"
+						>Lead</span
+					>
 					<Criteriacontrol
 						{tag}
 						value={judgement.get(tag.id)?.lead}
@@ -90,7 +104,11 @@
 
 				{#if !isQualifying}
 					<!-- Chase -->
-					<div class="w-36 justify-self-end">
+					<div class="flex items-center justify-between gap-3 md:w-36 md:justify-self-end">
+						<span
+							class="text-xs font-medium tracking-wide text-muted-foreground uppercase md:hidden"
+							>Chase</span
+						>
 						<Criteriacontrol
 							{tag}
 							value={judgement.get(tag.id)?.chase}

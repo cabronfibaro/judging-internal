@@ -20,6 +20,10 @@
 	import AlertDialogFooter from '../ui/alert-dialog/alert-dialog-footer.svelte';
 	import AlertDialogCancel from '../ui/alert-dialog/alert-dialog-cancel.svelte';
 	import AlertDialogAction from '../ui/alert-dialog/alert-dialog-action.svelte';
+	import Empty from '../ui/empty/empty.svelte';
+	import EmptyHeader from '../ui/empty/empty-header.svelte';
+	import EmptyTitle from '../ui/empty/empty-title.svelte';
+	import EmptyDescription from '../ui/empty/empty-description.svelte';
 
 	let {
 		tournament = $bindable(),
@@ -138,46 +142,74 @@
 			.filter((entrant): entrant is Entrant => entrant !== undefined);
 	});
 
-	const front = $derived(orderedEntrants[0].participantId);
+	const front = $derived(orderedEntrants[0]?.participantId);
 
 	const concluding = $derived.by(() => {
 		return !entrants.some((entrant) => entrant.status === 'pending');
 	});
 </script>
 
-<div class="space-y-3">
-	<div>
-		<h3 class="font-semibold">Entrants</h3>
-		<p class="text-sm text-muted-foreground">Current qualification scores</p>
+	<div class="space-y-4">
+	<div class="flex items-end justify-between gap-4">
+		<div>
+			<h3 class="font-semibold tracking-tight">Entrants</h3>
+			<p class="text-sm text-muted-foreground">Current qualification scores</p>
+		</div>
+		{#if orderedEntrants.length > 0}
+			<span class="text-xs font-medium text-muted-foreground">
+				{orderedEntrants.length} {orderedEntrants.length === 1 ? 'entrant' : 'entrants'}
+			</span>
+		{/if}
 	</div>
 
-	<div class="divide-y rounded-md border">
+	{#if orderedEntrants.length === 0}
+		<Empty class="min-h-40 border-dashed py-10">
+			<EmptyHeader>
+				<EmptyTitle>No entrants yet</EmptyTitle>
+				<EmptyDescription>
+					Entrants will appear here once they are added to this tournament.
+				</EmptyDescription>
+			</EmptyHeader>
+		</Empty>
+	{:else}
+	<div class="divide-y overflow-hidden rounded-lg border bg-card">
 		{#each orderedEntrants as entrant, idx (entrant.id)}
 			<button
 				type="button"
 				class={[
-					'flex w-full items-center justify-between px-4 py-3 text-left transition-colors',
+					'flex w-full items-center justify-between gap-4 px-3 py-3.5 text-left transition-colors sm:px-4',
 					front === entrant.participantId ? 'bg-accent text-accent-foreground' : 'hover:bg-muted/50'
 				]}
 			>
-				<div class="flex items-center gap-3">
-					<span class="font-medium">
-						{entrant.name}
+				<div class="flex min-w-0 items-center gap-3">
+					<span
+						class="flex size-7 shrink-0 items-center justify-center rounded-md border bg-muted/50 text-xs font-semibold tabular-nums text-muted-foreground"
+						aria-label={`Rank ${idx + 1}`}
+					>
+						{idx + 1}
 					</span>
 
-					{#if entrant.status === 'pending'}
-						{#if idx === 0}
-							<Badge variant="default">On Going</Badge>
+					<div class="min-w-0 space-y-1">
+						<p class="truncate font-medium">{entrant.name}</p>
+
+						{#if entrant.status === 'pending'}
+							{#if idx === 0}
+								<Badge variant="default">On Going</Badge>
+							{:else}
+								<Badge variant="outline">Pending</Badge>
+							{/if}
+						{:else if entrant.status === 'qualified'}
+							<Badge>Qualified</Badge>
+						{:else if entrant.status === 'not_qualified'}
+							<Badge variant="destructive">Not Qualified</Badge>
+						{:else if entrant.status === 'scored'}
+							<Badge variant="secondary">Scored</Badge>
 						{/if}
-					{:else if entrant.status === 'qualified'}
-						<Badge>Qualified</Badge>
-					{:else if entrant.status === 'not_qualified'}
-						<Badge variant="destructive">Not Qualified</Badge>
-					{/if}
+					</div>
 				</div>
 
-				<div class="flex items-center gap-3">
-					<span class="text-lg font-semibold tabular-nums">
+				<div class="flex shrink-0 items-center gap-2 sm:gap-3">
+					<span class="min-w-10 text-right text-lg font-semibold tabular-nums">
 						{entrant.status === 'pending' ? 'TBA' : entrant.score}
 					</span>
 
@@ -220,6 +252,7 @@
 			</button>
 		{/each}
 	</div>
+	{/if}
 
 	{#if concluding}
 		<AlertDialog bind:open={concludeDialogOpen}>

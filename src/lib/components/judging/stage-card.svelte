@@ -13,8 +13,8 @@
 	} = $props();
 </script>
 
-<Card>
-	<CardHeader>
+<Card class="gap-0 border-border/70 shadow-none">
+	<CardHeader class="pb-4">
 		<CardTitle>Stage</CardTitle>
 	</CardHeader>
 	<Separator />

@@ -22,6 +22,10 @@
 	import { syncTournament, type Battles } from '#lib/api/tournaments';
 	import { getJson } from '#lib/utils';
 	import { useQueryClient } from '@tanstack/svelte-query';
+	import Empty from '../ui/empty/empty.svelte';
+	import EmptyHeader from '../ui/empty/empty-header.svelte';
+	import EmptyTitle from '../ui/empty/empty-title.svelte';
+	import EmptyDescription from '../ui/empty/empty-description.svelte';
 
 	let {
 		matches,
@@ -172,29 +176,37 @@
 	}
 </script>
 
-<div class="space-y-4">
+<div class="space-y-4 pt-4">
 	<div>
 		<h3 class="font-semibold">Bracket</h3>
 		<p class="text-sm text-muted-foreground">Drift battle matches by round</p>
 	</div>
 
 	<Tabs value="round-1">
-		<TabsList
-			class="grid w-full"
-			style={`grid-template-columns: repeat(${sortedMatches.length}, minmax(0, 1fr))`}
-		>
-			{#each sortedMatches as round}
-				{@const roundNumber = round[0]?.match[0]?.round ?? 0}
+		{#if sortedMatches.length === 0}
+			<Empty class="min-h-48 border-dashed py-10">
+				<EmptyHeader>
+					<EmptyTitle>No bracket matches yet</EmptyTitle>
+					<EmptyDescription>
+						Matches will appear here after qualifying is concluded and the bracket is synced.
+					</EmptyDescription>
+				</EmptyHeader>
+			</Empty>
+		{:else}
+			<TabsList class="overflow-x w-full justify-start gap-1 overscroll-x-contain">
+				{#each sortedMatches as round}
+					{@const roundNumber = round[0]?.match[0]?.round ?? 0}
 
-				{#if roundNumber === 0}
-					<TabsTrigger value="third-place">3rd Place</TabsTrigger>
-				{:else}
-					<TabsTrigger value={`round-${roundNumber}`}>
-						Round {roundNumber}
-					</TabsTrigger>
-				{/if}
-			{/each}
-		</TabsList>
+					{#if roundNumber === 0}
+						<TabsTrigger class="min-w-fit flex-none" value="third-place">3rd Place</TabsTrigger>
+					{:else}
+						<TabsTrigger class="min-w-fit flex-none" value={`round-${roundNumber}`}>
+							Round {roundNumber}
+						</TabsTrigger>
+					{/if}
+				{/each}
+			</TabsList>
+		{/if}
 
 		{#each sortedMatches as round}
 			{@const roundNumber = round[0]?.match[0]?.round ?? 0}
@@ -216,43 +228,44 @@
 					{#each round as matchData}
 						{@const match = matchData.match}
 						{@const currentMatch = match[0]}
+						{@const hasBothParticipants = match[0].participantId && match[1].participantId}
 
-						<Card>
-							<CardHeader class="pb-3">
+						<Card class="border-border/80">
+							<CardHeader class="border-b pb-3">
 								<div class="flex items-center justify-between">
-									<CardTitle class="text-sm">Match</CardTitle>
+									<CardTitle class="text-sm">Match {round.indexOf(matchData) + 1}</CardTitle>
 
-									{#if currentMatch.status !== 'open'}
-										<Badge variant="secondary">
-											{capitalize(currentMatch.status)}
-										</Badge>
-									{/if}
+									<div class="flex items-center gap-2">
+										{#if currentMatch.status !== 'open'}
+											<Badge variant="secondary">
+												{capitalize(currentMatch.status)}
+											</Badge>
+										{/if}
+									</div>
 								</div>
 							</CardHeader>
 
-							<CardContent class="space-y-2">
+							<CardContent class="space-y-3 pt-4">
 								{#each match as entrant}
 									<div
 										class={[
-											'flex items-center justify-between rounded-md border px-4 py-3',
-											entrant.winnerId === entrant.challongeParticipantId
+											'flex items-center justify-between gap-3 rounded-md border px-3 py-3 sm:px-4',
+											entrant.winnerId && entrant.winnerId === entrant.challongeParticipantId
 												? 'border-green-500/30 bg-green-500/10'
 												: ''
 										]}
 									>
-										<div class="flex items-center justify-between">
-											<div class="flex items-center gap-3">
-												<span class="font-medium">
-													{entrant.participant_name ?? 'TBD'}
-												</span>
+										<div class="flex min-w-0 items-center gap-3">
+											<span class="truncate font-medium">
+												{entrant.participant_name ?? 'TBD'}
+											</span>
 
-												{#if matchData.leadingParticipantId === entrant.participantId && currentMatch.status !== 'complete'}
-													<Badge variant="outline">Lead</Badge>
-												{/if}
-											</div>
+											{#if hasBothParticipants && matchData.leadingParticipantId === entrant.participantId && currentMatch.status !== 'complete'}
+												<Badge variant="outline">Lead</Badge>
+											{/if}
 										</div>
 
-										<span>{entrant.score}</span>
+										<span class="shrink-0 text-lg font-semibold tabular-nums">{entrant.score}</span>
 
 										{#if entrant.winnerId !== null && entrant.winnerId === entrant.participantId}
 											<Badge>Winner</Badge>
@@ -261,7 +274,7 @@
 								{/each}
 
 								<div class="flex justify-end gap-4">
-									{#if selectedMatchId !== currentMatch.matchId && currentMatch.status !== 'complete'}
+									{#if hasBothParticipants && selectedMatchId !== currentMatch.matchId && currentMatch.status !== 'complete'}
 										<Button onclick={() => onStartMatch(match)}>Load</Button>
 									{/if}
 

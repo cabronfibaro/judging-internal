@@ -32,35 +32,37 @@
 	let chase = $derived(categories.find(([id]) => id === 'chase'));
 </script>
 
-<div class="relative flex flex-col gap-y-4">
+<div class="relative flex flex-col gap-5" aria-busy={judgement.processing}>
 	{#if isQualifying || stage.matchId}
-		<div class="grid grid-cols-2 gap-4">
-			{#if common}
-				{@const [, category] = common}
-				<div class:col-span-2={!isQualifying}>
-					<CommoncriteriaCard {category} {judgement} {isQualifying} />
-				</div>
-			{/if}
+		<div class="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_18rem]">
+			<div class="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
+				{#if common}
+					{@const [, category] = common}
+					<div class={!isQualifying ? 'md:col-span-2' : ''}>
+						<CommoncriteriaCard {category} {judgement} {isQualifying} />
+					</div>
+				{/if}
 
-			{#if lead}
-				{@const [, category] = lead}
-				<CriteriaCard {category} role="lead" {judgement} />
-			{/if}
+				{#if lead}
+					{@const [, category] = lead}
+					<CriteriaCard {category} role="lead" {judgement} />
+				{/if}
 
-			{#if chase && !isQualifying}
-				{@const [, category] = chase}
-				<CriteriaCard {category} role="chase" {judgement} />
-			{/if}
+				{#if chase && !isQualifying}
+					{@const [, category] = chase}
+					<CriteriaCard {category} role="chase" {judgement} />
+				{/if}
+			</div>
+
+			<div class="min-w-0 xl:sticky xl:top-24">{@render children()}</div>
 		</div>
-
-		{@render children()}
 	{/if}
 
 	{#if judgement.processing}
 		<div
-			class="absolute -inset-1 z-50 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-sm"
+			class="absolute inset-0 z-50 flex items-center justify-center rounded-xl bg-background/95 px-4"
 		>
-			<Empty class="w-full border-0 shadow-none ring-0">
+			<Empty class="w-full max-w-md border-0 bg-transparent shadow-none ring-0">
 				<EmptyHeader>
 					<EmptyMedia variant="icon">
 						<Spinner />

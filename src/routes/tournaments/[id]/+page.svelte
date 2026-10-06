@@ -57,7 +57,7 @@
 	const isQualifying = $derived(tournament.status === 'qualifying');
 </script>
 
-<div class="mx-auto max-w-4xl space-y-4 p-6">
+<div class="mx-auto max-w-6xl space-y-4 p-6">
 	<StageCard>
 		{#if isQualifying}
 			<EntrantList bind:tournament entrants={entrantsQuery.data} />
