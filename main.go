@@ -2,9 +2,9 @@ package main
 
 import (
 	"embed"
+	"judginginternal/internal/config"
+	"judginginternal/internal/db"
 	"log"
-	"myproject/internal/config"
-	"myproject/internal/db"
 	"os"
 	"path"
 

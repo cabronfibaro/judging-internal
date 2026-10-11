@@ -1,9 +1,10 @@
-module myproject
+module judginginternal
 
 go 1.26.0
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.20.1
+	github.com/matoous/go-nanoid/v2 v2.1.0
 	github.com/mattn/go-sqlite3 v1.14.52
 	github.com/wailsapp/wails/v2 v2.16.0
 )

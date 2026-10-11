@@ -6,8 +6,9 @@
     "module": "ESNext",
     "resolveJsonModule": true,
     "paths": {
-      "$lib": ["./src/lib"],
-      "$lib/*": ["./src/lib/*"]
+      "$src": ["./src"],
+      "$src/*": ["./src/*"],
+      "$wails/*": ["./wailsjs/*"]
     },
     /**
      * Typecheck JS in `.svelte` and `.js` files by default.

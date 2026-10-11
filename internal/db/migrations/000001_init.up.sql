@@ -1,6 +1,6 @@
 CREATE TABLE tracks (
     id TEXT PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     config TEXT,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
@@ -36,7 +36,8 @@ CREATE TABLE entrants (
     id TEXT PRIMARY KEY NOT NULL,
     tournament_id TEXT NOT NULL
         REFERENCES tournaments(id) ON DELETE CASCADE,
-    participant_id TEXT NOT NULL REFERENCES participants(id),
+    participant_id TEXT NOT NULL 
+        REFERENCES participants(id) ON DELETE CASCADE,
     status TEXT NOT NULL DEFAULT 'pending'
         CHECK (status IN ('qualified', 'not_qualified', 'pending', 'scored')),
     score REAL NOT NULL DEFAULT 0,

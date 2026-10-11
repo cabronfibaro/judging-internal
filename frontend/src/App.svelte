@@ -1,13 +1,14 @@
 <script lang="ts">
-  import "./app.css";
   import {
     RouterView,
     type Route,
     type RouterOptions,
   } from "@dvcol/svelte-simple-router";
   import { QueryClient, QueryClientProvider } from "@tanstack/svelte-query";
-  import Home from "./components/layouts/home.svelte";
-  import Tournament from "./components/layouts/tournament.svelte";
+  import { ModeWatcher } from "mode-watcher";
+
+  import Home from "./components/pages/home.svelte";
+  import Tournament from "./components/pages/tournament.svelte";
 
   const RouteName = {
     Home: "home",
@@ -35,6 +36,7 @@
   const queryClient = new QueryClient();
 </script>
 
+<ModeWatcher defaultMode="dark" />
 <QueryClientProvider client={queryClient}>
   <RouterView {options} />
 </QueryClientProvider>
