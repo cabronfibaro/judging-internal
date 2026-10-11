@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS active_battles;
+DROP TABLE IF EXISTS nodes;
+DROP TABLE IF EXISTS brackets;
+DROP TABLE IF EXISTS entrants;
+DROP TABLE IF EXISTS participants;
+DROP TABLE IF EXISTS tournaments;
+DROP TABLE IF EXISTS tracks;

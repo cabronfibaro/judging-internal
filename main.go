@@ -2,6 +2,11 @@ package main
 
 import (
 	"embed"
+	"log"
+	"myproject/internal/config"
+	"myproject/internal/db"
+	"os"
+	"path"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -12,12 +17,24 @@ import (
 var assets embed.FS
 
 func main() {
-	// Create an instance of the app structure
-	app := NewApp()
+	workspace, err := initializeWorkspace()
+	if err != nil {
+		log.Fatalf("could not initialize workspace folder: %v", err)
+	}
 
-	// Create application with options
-	err := wails.Run(&options.App{
-		Title:  "myproject",
+	cfg, err := config.New(workspace)
+	if err != nil {
+		log.Fatalf("could not load config file: %v", err)
+	}
+
+	if err := db.RunMigrations(workspace); err != nil {
+		log.Fatalf("could not run database migrations: %v", err)
+	}
+
+	app := NewApp(cfg)
+
+	err = wails.Run(&options.App{
+		Title:  "judging-internal",
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{
@@ -25,7 +42,7 @@ func main() {
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.startup,
-		Bind: []interface{}{
+		Bind: []any{
 			app,
 		},
 	})
@@ -33,4 +50,21 @@ func main() {
 	if err != nil {
 		println("Error:", err.Error())
 	}
+}
+
+func initializeWorkspace() (string, error) {
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	p := path.Join(dir, ".judging-internal")
+	_, err = os.Stat(p)
+	if os.IsNotExist(err) {
+		if err := os.MkdirAll(p, os.ModePerm); err != nil {
+			return "", nil
+		}
+	} else if err != nil {
+		return "", nil
+	}
+	return p, nil
 }
