@@ -15,7 +15,7 @@ import (
 
 type BracketRepository interface {
 	GetBracket(ctx context.Context, tournamentID string) (Bracket, error)
-	Sync(ctx context.Context, tournamentID string) (SyncResult, error)
+	Sync(ctx context.Context, tournamentID string) error
 }
 
 type SQLiteBracketRepository struct {
@@ -40,6 +40,7 @@ type ActiveBattle struct {
 	MatchID       string `json:"matchId"`
 	ParticipantID string `json:"participantId"`
 	LeadStatus    int    `json:"leadStatus"`
+	Rerun         int    `json:"rerun"`
 }
 
 type existingNode struct {
@@ -74,13 +75,13 @@ func (r *SQLiteBracketRepository) GetBracket(
 func (r *SQLiteBracketRepository) Sync(
 	ctx context.Context,
 	tournamentID string,
-) (SyncResult, error) {
+) error {
 	bracket, err := r.GetBracket(ctx, tournamentID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return SyncResult{}, errors.New("bracket not found")
+			return errors.New("bracket not found")
 		}
-		return SyncResult{}, err
+		return err
 	}
 
 	matches, err := challonge.GetMatches(
@@ -89,31 +90,23 @@ func (r *SQLiteBracketRepository) Sync(
 		r.ChallongeAPIKey,
 	)
 	if err != nil {
-		return SyncResult{}, err
+		return err
 	}
 
 	if err := r.syncNodes(ctx, bracket, tournamentID, matches); err != nil {
-		return SyncResult{}, err
+		return err
 	}
 
 	groupedMatches, err := r.getBracketMatches(ctx, tournamentID)
 	if err != nil {
-		return SyncResult{}, err
+		return err
 	}
 
 	if err := r.createActiveBattles(ctx, tournamentID, groupedMatches); err != nil {
-		return SyncResult{}, err
+		return err
 	}
 
-	battles, err := r.getActiveBattles(ctx, tournamentID)
-	if err != nil {
-		return SyncResult{}, err
-	}
-
-	return SyncResult{
-		Matches:       groupedMatches,
-		ActiveBattles: battles,
-	}, nil
+	return nil
 }
 
 func (r *SQLiteBracketRepository) syncNodes(
@@ -529,52 +522,6 @@ func (r *SQLiteBracketRepository) getBracketMatches(
 	}
 
 	return groupedMatches, nil
-}
-
-func (r *SQLiteBracketRepository) getActiveBattles(
-	ctx context.Context,
-	tournamentID string,
-) ([]ActiveBattle, error) {
-	rows, err := r.DB.QueryContext(ctx, `
-		SELECT
-			ab.id,
-			ab.match_id,
-			ab.participant_id,
-			ab.lead_status
-		FROM active_battles ab
-		INNER JOIN nodes n
-			ON n.match_id = ab.match_id
-		INNER JOIN brackets b
-			ON b.id = n.bracket_id
-		WHERE b.tournament_id = ?
-	`, tournamentID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var battles []ActiveBattle
-
-	for rows.Next() {
-		var battle ActiveBattle
-
-		if err := rows.Scan(
-			&battle.ID,
-			&battle.MatchID,
-			&battle.ParticipantID,
-			&battle.LeadStatus,
-		); err != nil {
-			return nil, err
-		}
-
-		battles = append(battles, battle)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return battles, nil
 }
 
 func boolToInt(value bool) int {

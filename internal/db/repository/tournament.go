@@ -21,16 +21,17 @@ type CreateTournamentRequest struct {
 	Track                    string   `json:"track"`
 	Entrants                 []string `json:"entrants"`
 	RandomizeQualifyingOrder bool     `json:"randomizeQualifyingOrder"`
+	QualifyingOrder          []string `json:"qualifyingOrder"`
 }
 
 type BracketMatch struct {
-	MatchID                string   `json:"matchId"`
-	ParticipantName        *string  `json:"participant_name"`
+	MatchID                string   `json:"matchID"`
+	ParticipantName        *string  `json:"participantName"`
 	Status                 string   `json:"status"`
 	Round                  int      `json:"round"`
 	WinnerID               *string  `json:"winnerId"`
-	ChallongeParticipantID *string  `json:"challongeParticipantId"`
-	ParticipantID          *string  `json:"participantId"`
+	ChallongeParticipantID *string  `json:"challongeParticipantID"`
+	ParticipantID          *string  `json:"participantID"`
 	Score                  *float64 `json:"score"`
 	BothRunFinished        bool     `json:"bothRunFinished"`
 }
@@ -40,6 +41,7 @@ type TournamentRepository interface {
 	GetTournaments() ([]tournament.Tournament, error)
 	GetTournamentById(string) (tournament.Tournament, error)
 	DeleteTournamentById(context.Context, string) error
+	UpdateTournament(context.Context, string, UpdateTournamentRequest) error
 	UpdateTournamentState(context.Context, string, string) error
 }
 
@@ -400,6 +402,74 @@ func (r *SQLiteTournamentRepository) DeleteTournamentById(
 	return nil
 }
 
+type UpdateTournamentRequest struct {
+	Name            *string   `json:"name"`
+	Size            *int      `json:"size"`
+	StartingDate    *string   `json:"startingDate"`
+	Track           *string   `json:"track"`
+	QualifyingOrder *[]string `json:"qualifyingOrder"`
+}
+
+func (r *SQLiteTournamentRepository) UpdateTournament(
+	ctx context.Context,
+	id string,
+	payload UpdateTournamentRequest,
+) error {
+	var set []string
+	var args []any
+
+	if payload.Name != nil {
+		set = append(set, "name = ?")
+		args = append(args, *payload.Name)
+	}
+
+	if payload.Size != nil {
+		set = append(set, "size = ?")
+		args = append(args, *payload.Size)
+	}
+
+	if payload.StartingDate != nil {
+		set = append(set, "starting_date = ?")
+		args = append(args, *payload.StartingDate)
+	}
+
+	if payload.Track != nil {
+		set = append(set, "track = ?")
+		args = append(args, *payload.Track)
+	}
+
+	if payload.QualifyingOrder != nil {
+		set = append(set, "qualifying_order = ?")
+		args = append(args, strings.Join(*payload.QualifyingOrder, ", "))
+	}
+
+	if len(set) == 0 {
+		return nil
+	}
+
+	query := fmt.Sprintf(
+		"UPDATE tournaments SET %s WHERE id = ?",
+		strings.Join(set, ", "),
+	)
+
+	args = append(args, id)
+
+	result, err := r.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("update tournament: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("get affected rows: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("tournament %q not found", id)
+	}
+
+	return nil
+}
+
 func (r *SQLiteTournamentRepository) UpdateTournamentState(ctx context.Context, id, state string) error {
 	validStates := map[string]bool{
 		"process_checkin":      true,
@@ -417,13 +487,13 @@ func (r *SQLiteTournamentRepository) UpdateTournamentState(ctx context.Context, 
 		return fmt.Errorf("state %q is invalid", state)
 	}
 
-	var challongeID string
+	var challongeUrl string
 	err := r.DB.QueryRowContext(ctx, `
-		SELECT challonge_id
+		SELECT url
 		FROM brackets
 		WHERE tournament_id = ?
 		LIMIT 1
-	`, id).Scan(&challongeID)
+	`, id).Scan(&challongeUrl)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return errors.New("bracket not found")
@@ -434,7 +504,7 @@ func (r *SQLiteTournamentRepository) UpdateTournamentState(ctx context.Context, 
 	if err := challonge.UpdateTournamentState(
 		ctx,
 		r.ChallongeAPIKey,
-		challongeID,
+		challongeUrl,
 		state,
 	); err != nil {
 		return err

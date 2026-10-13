@@ -5,6 +5,7 @@
     type RouterOptions,
   } from "@dvcol/svelte-simple-router";
   import { QueryClient, QueryClientProvider } from "@tanstack/svelte-query";
+  import { SvelteQueryDevtools } from "@tanstack/svelte-query-devtools";
   import { ModeWatcher } from "mode-watcher";
 
   import Home from "./components/pages/home.svelte";
@@ -38,5 +39,6 @@
 
 <ModeWatcher defaultMode="dark" />
 <QueryClientProvider client={queryClient}>
+  <SvelteQueryDevtools />
   <RouterView {options} />
 </QueryClientProvider>

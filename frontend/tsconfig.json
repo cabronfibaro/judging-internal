@@ -24,7 +24,8 @@
     "src/**/*.d.ts",
     "src/**/*.ts",
     "src/**/*.js",
-    "src/**/*.svelte"
+    "src/**/*.svelte",
+    "src/constant/default-criteria.json"
   ],
   "references": [
     {

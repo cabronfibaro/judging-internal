@@ -53,6 +53,9 @@
       deleteDialogOpen = false;
       selectedTournament = null;
     },
+    onError: (err) => {
+      console.error(`Error while deleting tournament: ${err}`);
+    },
   }));
 
   let deleteDialogOpen = $state(false);

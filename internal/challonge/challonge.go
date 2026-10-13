@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -86,12 +85,21 @@ func CreateTournament(
 	}
 	defer resp.Body.Close()
 
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read response body: %w", err)
+	}
+
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		return nil, fmt.Errorf("Challonge returned HTTP %d", resp.StatusCode)
+		return nil, fmt.Errorf(
+			"Challonge returned HTTP %d: %s",
+			resp.StatusCode,
+			string(respBody),
+		)
 	}
 
 	var result ChallongeTournamentResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	if err := json.Unmarshal(respBody, &result); err != nil {
 		return nil, fmt.Errorf("decode Challonge response: %w", err)
 	}
 
@@ -120,8 +128,17 @@ func DeleteTournament(ctx context.Context, apiKey string, tournamentID string) e
 	}
 	defer resp.Body.Close()
 
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("read response body: %w", err)
+	}
+
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		return fmt.Errorf("Challonge returned HTTP %d", resp.StatusCode)
+		if resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("[DeleteTournament] Challonge tournament with ID/URL %s not found", tournamentID)
+		}
+
+		return fmt.Errorf("Challonge returned HTTP %d: %s", resp.StatusCode, string(respBody))
 	}
 
 	return nil
@@ -179,6 +196,9 @@ func UpdateTournamentState(
 	}
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		if resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("[UpdateTournamentState] Challonge with ID/URL %s not found", tournamentID)
+		}
 		return fmt.Errorf("Challonge returned HTTP %d: %s", resp.StatusCode, string(respBody))
 	}
 
@@ -237,7 +257,7 @@ func GetMatches(
 ) ([]MatchData, error) {
 	url := fmt.Sprintf(
 		"https://api.challonge.com/v2.1/tournaments/%s/matches.json",
-		strconv.Quote(challongeTournamentID),
+		challongeTournamentID,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -256,12 +276,20 @@ func GetMatches(
 	}
 	defer resp.Body.Close()
 
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read response body: %w", err)
+	}
+
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		return nil, fmt.Errorf("Challonge returned HTTP %d", resp.StatusCode)
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, fmt.Errorf("[GetMatches] Challonge with tournament ID/URL %s not found", challongeTournamentID)
+		}
+		return nil, fmt.Errorf("Challonge returned HTTP %d: %s", resp.StatusCode, string(respBody))
 	}
 
 	var result MatchResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	if err := json.Unmarshal(respBody, &result); err != nil {
 		return nil, fmt.Errorf("decode Challonge matches: %w", err)
 	}
 
