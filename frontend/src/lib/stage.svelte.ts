@@ -26,7 +26,6 @@ const defaultValue: State = {
 };
 
 class Stage {
-  tournamentId = $state("");
   state = $state(defaultValue);
   matchId = $state<string | undefined>(undefined);
 

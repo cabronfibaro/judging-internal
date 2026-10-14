@@ -43,11 +43,13 @@
   type Battles = repository.ActiveBattle[];
 
   let {
+    tournamentID,
     matches,
     judgement,
     stage,
     activeBattles,
   }: {
+    tournamentID: string;
     matches: Tournament.GroupedMatches;
     judgement: Judgement;
     stage: Stage;
@@ -141,29 +143,29 @@
   );
 
   async function onHandleOMT(match: repository.Match[]) {
-    await ResetBattle(stage.tournamentId, selectedMatchId!);
+    await ResetBattle(tournamentID, selectedMatchId!);
 
     await queryClient.invalidateQueries({
-      queryKey: ["activeBattles", stage.tournamentId],
+      queryKey: ["activeBattles", tournamentID],
     });
 
     await queryClient.invalidateQueries({
-      queryKey: ["matches", stage.tournamentId],
+      queryKey: ["matches", tournamentID],
     });
 
     onStartMatch(match);
   }
 
   async function onHandleConclude() {
-    await ConcludeBattle(stage.tournamentId, selectedMatchId!);
-    await SyncTournament(stage.tournamentId);
+    await ConcludeBattle(tournamentID, selectedMatchId!);
+    await SyncTournament(tournamentID);
 
     await queryClient.invalidateQueries({
-      queryKey: ["activeBattles", stage.tournamentId],
+      queryKey: ["activeBattles", tournamentID],
     });
 
     await queryClient.invalidateQueries({
-      queryKey: ["matches", stage.tournamentId],
+      queryKey: ["matches", tournamentID],
     });
 
     stage.clear();

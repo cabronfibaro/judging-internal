@@ -303,7 +303,7 @@ func (r *SQLiteMatchesRepository) UpdateMatchSingleParticipant(
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return Node{}, fmt.Errorf("participant not found")
+			return Node{}, fmt.Errorf("participant not found with id %s", params.ParticipantID)
 		}
 		return Node{}, fmt.Errorf("find participant node: %w", err)
 	}

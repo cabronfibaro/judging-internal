@@ -13,9 +13,11 @@
   import { useQueryClient } from "@tanstack/svelte-query";
 
   let {
+    tournamentID,
     judgement,
     stage,
   }: {
+    tournamentID: string;
     judgement: Judgement;
     stage: Stage;
   } = $props();
@@ -37,14 +39,14 @@
 
       await Promise.all([
         UpdateMatchSingleParticipant({
-          TournamentID: stage.tournamentId,
+          TournamentID: tournamentID,
           MatchID: stage.matchId!,
           ParticipantID: p1.participantId,
           AppendScore: true,
           Score: p1.score,
         }),
         UpdateMatchSingleParticipant({
-          TournamentID: stage.tournamentId,
+          TournamentID: tournamentID,
           MatchID: stage.matchId!,
           ParticipantID: p2.participantId,
           AppendScore: true,
@@ -52,14 +54,14 @@
         }),
       ]);
 
-      await ChangeLeader(stage.tournamentId, stage.matchId!);
+      await ChangeLeader(tournamentID, stage.matchId!);
 
       await queryClient.invalidateQueries({
-        queryKey: ["activeBattles", stage.tournamentId],
+        queryKey: ["activeBattles", tournamentID],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["matches", stage.tournamentId],
+        queryKey: ["matches", tournamentID],
       });
 
       stage.switchLeader();

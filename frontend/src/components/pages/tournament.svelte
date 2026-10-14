@@ -22,7 +22,7 @@
 
   const route = $derived(useRoute());
   const location = $derived(route.location);
-  const tournamentId = $derived(location?.params?.id as string);
+  const tournamentID = $derived(location?.params?.id as string);
 
   let stage = new Stage();
   let judgement = new Judgement();
@@ -31,28 +31,28 @@
   const categories = $derived(Object.entries(criteriaConfig.categories));
 
   const tournamentQuery = createQuery(() => ({
-    queryKey: ["tournament", tournamentId],
-    enabled: !!tournamentId,
-    queryFn: async () => GetTournament(tournamentId),
+    queryKey: ["tournament", tournamentID],
+    enabled: !!tournamentID,
+    queryFn: async () => GetTournament(tournamentID),
   }));
 
   const matchesQuery = createQuery(() => ({
-    queryKey: ["matches", tournamentId],
-    enabled: !!tournamentId,
+    queryKey: ["matches", tournamentID],
+    enabled: !!tournamentID,
     queryFn: async (): Promise<Tournament.GroupedMatches> =>
-      GetMatches(tournamentId),
+      GetMatches(tournamentID),
   }));
 
   const activeBattles = createQuery(() => ({
-    queryKey: ["activeBattles", tournamentId],
-    enabled: !!tournamentId,
-    queryFn: async () => GetActiveMatches(tournamentId),
+    queryKey: ["activeBattles", tournamentID],
+    enabled: !!tournamentID,
+    queryFn: async () => GetActiveMatches(tournamentID),
   }));
 
   const entrantsQuery = createQuery(() => ({
-    queryKey: ["entrants", tournamentId],
-    enabled: !!tournamentId,
-    queryFn: () => GetEntrants(tournamentId),
+    queryKey: ["entrants", tournamentID],
+    enabled: !!tournamentID,
+    queryFn: () => GetEntrants(tournamentID),
   }));
 </script>
 
@@ -69,6 +69,7 @@
           />
         {:else}
           <Matches
+            {tournamentID}
             {stage}
             matches={matchesQuery.data ?? []}
             activeBattles={activeBattles.data ?? []}
@@ -85,7 +86,7 @@
             entrants={entrantsQuery.data ?? []}
           />
         {:else}
-          <BattleHandler {judgement} {stage} />
+          <BattleHandler {tournamentID} {judgement} {stage} />
         {/if}
       </Panel>
     </div>
