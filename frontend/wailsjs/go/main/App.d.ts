@@ -26,7 +26,11 @@ export function GetTournament(arg1:string):Promise<tournament.Tournament>;
 
 export function GetTournaments():Promise<Array<tournament.Tournament>>;
 
+export function HasChallongeAPIKey():Promise<boolean>;
+
 export function ResetBattle(arg1:string,arg2:string):Promise<void>;
+
+export function SetChallongeAPIKey(arg1:string):Promise<void>;
 
 export function SyncTournament(arg1:string):Promise<void>;
 

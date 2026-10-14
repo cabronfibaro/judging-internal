@@ -290,8 +290,6 @@ GROUP BY b.tournament_id
 			return nil, err
 		}
 
-		fmt.Println(totalMatches, completedMatches)
-
 		totalMatchesByTournament[tournamentID] = totalMatches
 		completedMatchesByTournament[tournamentID] = completedMatches
 	}

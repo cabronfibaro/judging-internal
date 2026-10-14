@@ -9,6 +9,7 @@ import (
 	"judginginternal/internal/db/repository"
 	"judginginternal/internal/models/entrant"
 	"judginginternal/internal/models/tournament"
+	"net/http"
 	"path"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -63,6 +64,38 @@ func (a *App) startup(ctx context.Context) {
 	}
 
 	runtime.LogInfo(a.ctx, "Database connection established and repositories initialized")
+}
+
+func (a *App) HasChallongeAPIKey() bool {
+	if _, err := a.cfg.Get(config.ChallongeApiKey); err != nil {
+		return false
+	}
+	return true
+}
+
+func (a *App) SetChallongeAPIKey(key string) error {
+	url := "https://api.challonge.com/v2.1/me.json"
+	req, err := http.NewRequestWithContext(a.ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/vnd.api+json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization-Type", "v1")
+	req.Header.Set("Authorization", key)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("Internal server error: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return fmt.Errorf("Could not validate API Key %d", resp.StatusCode)
+	}
+
+	return a.cfg.Set(config.ChallongeApiKey, key)
 }
 
 func (a *App) GetTournaments() ([]tournament.Tournament, error) {

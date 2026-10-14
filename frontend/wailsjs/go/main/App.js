@@ -46,8 +46,16 @@ export function GetTournaments() {
   return window['go']['main']['App']['GetTournaments']();
 }
 
+export function HasChallongeAPIKey() {
+  return window['go']['main']['App']['HasChallongeAPIKey']();
+}
+
 export function ResetBattle(arg1, arg2) {
   return window['go']['main']['App']['ResetBattle'](arg1, arg2);
+}
+
+export function SetChallongeAPIKey(arg1) {
+  return window['go']['main']['App']['SetChallongeAPIKey'](arg1);
 }
 
 export function SyncTournament(arg1) {
