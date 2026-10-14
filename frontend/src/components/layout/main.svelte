@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import { link } from "svelte-spa-router";
   import { cn } from "$src/utils";
   import { Button } from "$src/components/ui/button";
   import Separator from "$src/components/ui/separator/separator.svelte";
@@ -10,6 +11,7 @@
   import Trophy from "@lucide/svelte/icons/trophy";
   import UsersRound from "@lucide/svelte/icons/users-round";
   import MapPinned from "@lucide/svelte/icons/map-pinned";
+  import SliderHorizontal from "@lucide/svelte/icons/sliders-horizontal";
   import ChevronRight from "@lucide/svelte/icons/chevron-right";
 
   let {
@@ -115,6 +117,19 @@
           >Soon</span
         >
       </button>
+      <a
+        href="/criteria-configs"
+        use:link
+        class={cn(
+          "group flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
+          // tournamentsActive
+          //   ? "bg-sidebar-accent text-sidebar-accent-foreground"
+          //   : "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground",
+        )}
+      >
+        <SliderHorizontal class="size-4" aria-hidden="true" />
+        <span class="flex-1">Criteria Configs</span>
+      </a>
     </nav>
 
     <Separator class="bg-sidebar-border" />

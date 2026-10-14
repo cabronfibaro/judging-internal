@@ -52,6 +52,7 @@
         track,
         entrants,
         randomizeQualifyingOrder,
+        qualifyingOrder: [],
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({

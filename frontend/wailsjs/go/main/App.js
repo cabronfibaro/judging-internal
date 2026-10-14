@@ -14,8 +14,20 @@ export function ConcludeQualifers(arg1) {
   return window['go']['main']['App']['ConcludeQualifers'](arg1);
 }
 
+export function CopyCriteriaConfigById(arg1) {
+  return window['go']['main']['App']['CopyCriteriaConfigById'](arg1);
+}
+
+export function CreateCriteriaConfig(arg1) {
+  return window['go']['main']['App']['CreateCriteriaConfig'](arg1);
+}
+
 export function CreateTournament(arg1) {
   return window['go']['main']['App']['CreateTournament'](arg1);
+}
+
+export function DeleteCriteriaConfig(arg1) {
+  return window['go']['main']['App']['DeleteCriteriaConfig'](arg1);
 }
 
 export function DeleteTournament(arg1, arg2) {
@@ -24,6 +36,14 @@ export function DeleteTournament(arg1, arg2) {
 
 export function GetActiveMatches(arg1) {
   return window['go']['main']['App']['GetActiveMatches'](arg1);
+}
+
+export function GetCriteriaConfigByID(arg1) {
+  return window['go']['main']['App']['GetCriteriaConfigByID'](arg1);
+}
+
+export function GetCriteriaConfigs() {
+  return window['go']['main']['App']['GetCriteriaConfigs']();
 }
 
 export function GetEntrants(arg1) {
@@ -60,6 +80,10 @@ export function SetChallongeAPIKey(arg1) {
 
 export function SyncTournament(arg1) {
   return window['go']['main']['App']['SyncTournament'](arg1);
+}
+
+export function UpdateCriteriaConfig(arg1, arg2) {
+  return window['go']['main']['App']['UpdateCriteriaConfig'](arg1, arg2);
 }
 
 export function UpdateEntrant(arg1) {

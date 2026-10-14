@@ -10,11 +10,21 @@ export function ConcludeBattle(arg1:string,arg2:string):Promise<void>;
 
 export function ConcludeQualifers(arg1:string):Promise<void>;
 
+export function CopyCriteriaConfigById(arg1:number):Promise<void>;
+
+export function CreateCriteriaConfig(arg1:repository.CriteriaConfig):Promise<void>;
+
 export function CreateTournament(arg1:repository.CreateTournamentRequest):Promise<tournament.Tournament>;
+
+export function DeleteCriteriaConfig(arg1:number):Promise<void>;
 
 export function DeleteTournament(arg1:string,arg2:string):Promise<void>;
 
 export function GetActiveMatches(arg1:string):Promise<Array<repository.ActiveBattle>>;
+
+export function GetCriteriaConfigByID(arg1:number):Promise<repository.CriteriaConfig>;
+
+export function GetCriteriaConfigs():Promise<Array<repository.CriteriaConfig>>;
 
 export function GetEntrants(arg1:string):Promise<Array<entrant.Entrant>>;
 
@@ -33,6 +43,8 @@ export function ResetBattle(arg1:string,arg2:string):Promise<void>;
 export function SetChallongeAPIKey(arg1:string):Promise<void>;
 
 export function SyncTournament(arg1:string):Promise<void>;
+
+export function UpdateCriteriaConfig(arg1:number,arg2:repository.CriteriaConfig):Promise<void>;
 
 export function UpdateEntrant(arg1:repository.UpdateEntrantParams):Promise<void>;
 

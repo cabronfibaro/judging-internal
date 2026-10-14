@@ -19,12 +19,13 @@ var client *sql.DB = nil
 
 // App struct
 type App struct {
-	ctx            context.Context
-	cfg            *config.Config
-	tournamentRepo repository.TournamentRepository
-	matchesRepo    repository.MatchesRepository
-	bracketRepo    repository.BracketRepository
-	entrantsRepo   repository.EntrantsRepository
+	ctx                context.Context
+	cfg                *config.Config
+	tournamentRepo     repository.TournamentRepository
+	matchesRepo        repository.MatchesRepository
+	bracketRepo        repository.BracketRepository
+	entrantsRepo       repository.EntrantsRepository
+	criteriaConfigRepo repository.CriteriaConfigRepository
 }
 
 // NewApp creates a new App application struct
@@ -61,6 +62,10 @@ func (a *App) startup(ctx context.Context) {
 	a.entrantsRepo = &repository.SQLiteEntrantsRepository{
 		DB:              client,
 		ChallongeAPIKey: a.cfg.ChallongeApiKey,
+	}
+
+	a.criteriaConfigRepo = &repository.SQLiteCriteriaConfigRepository{
+		DB: client,
 	}
 
 	runtime.LogInfo(a.ctx, "Database connection established and repositories initialized")
@@ -247,4 +252,29 @@ func (a *App) ChangeLeader(tournamentID, matchID string) error {
 	}
 
 	return nil
+}
+
+func (a *App) GetCriteriaConfigs() ([]repository.CriteriaConfig, error) {
+	return a.criteriaConfigRepo.Get()
+}
+
+func (a *App) GetCriteriaConfigByID(id int) (repository.CriteriaConfig, error) {
+	return a.criteriaConfigRepo.GetByID(id)
+}
+
+func (a *App) CreateCriteriaConfig(config repository.CriteriaConfig) error {
+	return a.criteriaConfigRepo.Create(config)
+}
+
+func (a *App) CopyCriteriaConfigById(id int) error {
+	_, err := a.criteriaConfigRepo.CopyByID(id)
+	return err
+}
+
+func (a *App) UpdateCriteriaConfig(id int, config repository.CriteriaConfig) error {
+	return a.criteriaConfigRepo.Update(id, config)
+}
+
+func (a *App) DeleteCriteriaConfig(id int) error {
+	return a.criteriaConfigRepo.Delete(id)
 }

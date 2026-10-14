@@ -71,6 +71,132 @@ export namespace repository {
 	        this.qualifyingOrder = source["qualifyingOrder"];
 	    }
 	}
+	export class CriteriaTag {
+	    id: string;
+	    label: string;
+	    type: string;
+	    valueType: string;
+	    max?: number;
+	    multiplier?: number;
+	    defaultValue?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CriteriaTag(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.label = source["label"];
+	        this.type = source["type"];
+	        this.valueType = source["valueType"];
+	        this.max = source["max"];
+	        this.multiplier = source["multiplier"];
+	        this.defaultValue = source["defaultValue"];
+	    }
+	}
+	export class CriteriaCategory {
+	    label: string;
+	    tags: CriteriaTag[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CriteriaCategory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.label = source["label"];
+	        this.tags = this.convertValues(source["tags"], CriteriaTag);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class CriteriaCategories {
+	    common: CriteriaCategory;
+	    lead: CriteriaCategory;
+	    chase: CriteriaCategory;
+	
+	    static createFrom(source: any = {}) {
+	        return new CriteriaCategories(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.common = this.convertValues(source["common"], CriteriaCategory);
+	        this.lead = this.convertValues(source["lead"], CriteriaCategory);
+	        this.chase = this.convertValues(source["chase"], CriteriaCategory);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class CriteriaConfig {
+	    id: number;
+	    name: string;
+	    categories: CriteriaCategories;
+	
+	    static createFrom(source: any = {}) {
+	        return new CriteriaConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.categories = this.convertValues(source["categories"], CriteriaCategories);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 	export class Match {
 	    matchId: string;
 	    participant_name?: string;

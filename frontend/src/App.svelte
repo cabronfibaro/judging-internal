@@ -14,6 +14,9 @@
     "/tournaments/:id": wrap({
       asyncComponent: () => import("./components/pages/tournament.svelte"),
     }),
+    "/criteria-configs": wrap({
+      asyncComponent: () => import("./components/pages/criteria-config.svelte"),
+    }),
   };
 
   const queryClient = new QueryClient();
