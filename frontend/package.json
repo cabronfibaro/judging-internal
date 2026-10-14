@@ -37,9 +37,9 @@
     "esbuild@0.28.2": true
   },
   "dependencies": {
-    "@dvcol/svelte-simple-router": "^2.7.2",
     "@tanstack/svelte-query": "^6.3.1",
     "@tanstack/svelte-query-devtools": "^6.3.2",
-    "mode-watcher": "^1.1.0"
+    "mode-watcher": "^1.1.0",
+    "svelte-spa-router": "^5.1.1"
   }
 }

@@ -197,6 +197,27 @@
       isProcessing = false;
     }
   }
+
+  function roundKeys() {
+    let keys: string[] = [];
+    for (let i = 0; i < sortedMatches.length; i++) {
+      const matches = sortedMatches[i].length;
+      if (matches > 2) {
+        keys.push(`Round ${i + 1}`);
+      } else {
+        if (matches == 2) {
+          keys.push("Semifinal");
+        } else if (matches == 1) {
+          if (sortedMatches[i][0].match[0].round === 0) {
+            keys.push("Third Place");
+            continue;
+          }
+          keys.push("Final");
+        }
+      }
+    }
+    return keys;
+  }
 </script>
 
 <div class="space-y-4 pt-4">
@@ -220,7 +241,7 @@
       <TabsList
         class="overflow-x w-full justify-start gap-1 overscroll-x-contain"
       >
-        {#each sortedMatches as round}
+        {#each sortedMatches as round, i}
           {@const roundNumber = round[0]?.match[0]?.round ?? 0}
 
           {#if roundNumber === 0}
@@ -232,14 +253,14 @@
               class="min-w-fit flex-none"
               value={`round-${roundNumber}`}
             >
-              Round {roundNumber}
+              {roundKeys()[i]}
             </TabsTrigger>
           {/if}
         {/each}
       </TabsList>
     {/if}
 
-    {#each sortedMatches as round}
+    {#each sortedMatches as round, i}
       {@const roundNumber = round[0]?.match[0]?.round ?? 0}
       {@const tabValue =
         roundNumber === 0 ? "third-place" : `round-${roundNumber}`}
@@ -247,7 +268,7 @@
       <TabsContent value={tabValue} class="mt-4 space-y-3">
         <div>
           <h4 class="font-medium">
-            {roundNumber === 0 ? "3rd Place" : `Round ${roundNumber}`}
+            {roundKeys()[i]}
           </h4>
 
           <p class="text-sm text-muted-foreground">

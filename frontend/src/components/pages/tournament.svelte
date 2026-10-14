@@ -1,6 +1,5 @@
 <script lang="ts">
   // TOOD (important): LOADING STATE FOR tournament, matches, activeBattles, entrants
-  import { useRoute } from "@dvcol/svelte-simple-router/router";
   import { createQuery } from "@tanstack/svelte-query";
   import DefaultCriteria from "$src/data/criteria/default-criteria.json";
 
@@ -20,9 +19,8 @@
   import Matches from "../tournaments/matches.svelte";
   import BattleHandler from "../judging/battle-handler.svelte";
 
-  const route = $derived(useRoute());
-  const location = $derived(route.location);
-  const tournamentID = $derived(location?.params?.id as string);
+  let { params = {} } = $props();
+  const tournamentID = $derived(params.id);
 
   let stage = new Stage();
   let judgement = new Judgement();

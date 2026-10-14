@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { link } from "svelte-spa-router";
   import CalendarDays from "@lucide/svelte/icons/calendar-days";
   import ExternalLink from "@lucide/svelte/icons/external-link";
   import Flag from "@lucide/svelte/icons/flag";
@@ -6,7 +7,7 @@
   import ArrowUpRight from "@lucide/svelte/icons/arrow-up-right";
   import Trash2 from "@lucide/svelte/icons/trash-2";
   import { Badge } from "$src/components/ui/badge";
-  import Button from "../ui/button/button.svelte";
+  import Button, { buttonVariants } from "../ui/button/button.svelte";
   import Card from "../ui/card/card.svelte";
   import CardContent from "../ui/card/card-content.svelte";
   import Progress from "../ui/progress/progress.svelte";
@@ -103,10 +104,14 @@
         </div>
 
         <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-          <Button href={`/tournaments/${tournament.id}`} class="w-full">
-            Open tournament
+          <a
+            href={`/tournaments/${tournament.id}`}
+            use:link
+            class={buttonVariants({ variant: "outline", class: "w-full" })}
+          >
+            Open Tournament
             <ArrowUpRight aria-hidden="true" />
-          </Button>
+          </a>
           <Button
             variant="ghost"
             class="text-destructive hover:bg-destructive/10 hover:text-destructive"
