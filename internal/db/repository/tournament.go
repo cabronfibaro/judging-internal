@@ -265,25 +265,13 @@ LEFT JOIN brackets t3
 
 	progressRows, err := r.DB.Query(`
 SELECT
-	b.tournament_id,
-	COUNT(DISTINCT n.match_id) AS total_matches,
-	COUNT(DISTINCT CASE
-		WHEN bs.complete = 1 THEN n.match_id
-	END) AS completed_matches
+    b.tournament_id,
+    COUNT(DISTINCT n.match_id) AS total_matches,
+    COUNT(DISTINCT CASE
+        WHEN n.status = 'complete' THEN n.match_id
+    END) AS completed_matches
 FROM brackets b
 JOIN nodes n ON n.bracket_id = b.id
-LEFT JOIN (
-	SELECT
-		match_id,
-		CASE
-			WHEN COUNT(*) = 2
-				AND SUM(CASE WHEN lead_status = -1 THEN 1 ELSE 0 END) = 2
-			THEN 1
-			ELSE 0
-		END AS complete
-	FROM active_battles
-	GROUP BY match_id
-) bs ON bs.match_id = n.match_id
 GROUP BY b.tournament_id
 `)
 	if err != nil {
@@ -302,6 +290,8 @@ GROUP BY b.tournament_id
 			return nil, err
 		}
 
+		fmt.Println(totalMatches, completedMatches)
+
 		totalMatchesByTournament[tournamentID] = totalMatches
 		completedMatchesByTournament[tournamentID] = completedMatches
 	}
@@ -314,7 +304,18 @@ GROUP BY b.tournament_id
 		tournamentID := tournaments[i].ID
 
 		if total, ok := totalMatchesByTournament[tournamentID]; ok && total > 0 {
-			tournaments[i].Progress = completedMatchesByTournament[tournamentID] * 100 / total
+			progress := 0.0
+			if total > 0 {
+				progress = (float64(completedMatchesByTournament[tournamentID]) / float64(total)) * 100
+			}
+
+			if progress < 0 {
+				progress = 0
+			} else if progress > 100 {
+				progress = 100
+			}
+
+			tournaments[i].Progress = progress
 		} else {
 			tournaments[i].Progress = 0
 		}

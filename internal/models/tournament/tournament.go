@@ -9,5 +9,5 @@ type Tournament struct {
 	Status          string  `json:"status"`
 	URL             string  `json:"url"`
 	Size            int     `json:"size"`
-	Progress        int     `json:"progress"`
+	Progress        float64 `json:"progress"`
 }

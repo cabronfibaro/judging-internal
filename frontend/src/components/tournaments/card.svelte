@@ -93,12 +93,12 @@
           <div class="flex items-center justify-between gap-3 text-xs">
             <span class="font-medium text-muted-foreground">Progress</span>
             <span class="text-foreground tabular-nums"
-              >{tournament.progress * 100}% complete</span
+              >{tournament.progress}% complete</span
             >
           </div>
           <Progress
-            value={tournament.progress * 100}
-            aria-label={`${tournament.name}: ${tournament.progress * 100}% complete`}
+            value={tournament.progress}
+            aria-label={`${tournament.name}: ${tournament.progress}% complete`}
           />
         </div>
 
