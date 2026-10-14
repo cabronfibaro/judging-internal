@@ -14,6 +14,7 @@
   import Label from "$src/components/ui/label/label.svelte";
   import { Input } from "$src/components/ui/input";
   import { tick } from "svelte";
+  import CategoryHeader from "./category-header.svelte";
 
   type CategoryKey = "common" | "lead" | "chase";
   type TagType = "neutral" | "deduction";
@@ -198,6 +199,15 @@
     formError = "";
     saveMutation.mutate();
   }
+
+  function copyCategory(source: "lead" | "chase", target: "lead" | "chase") {
+    const sourceCategory = categories[source];
+
+    categories[target] = {
+      label: sourceCategory.label,
+      tags: sourceCategory.tags.map((tag) => ({ ...tag })),
+    };
+  }
 </script>
 
 <Dialog.Root bind:open>
@@ -232,29 +242,18 @@
 
       {#each [{ key: "common", title: "Common", category: categories.common }, { key: "lead", title: "Lead", category: categories.lead }, { key: "chase", title: "Chase", category: categories.chase }] as section (section.key)}
         <section class="space-y-4 rounded-lg border p-4">
-          <div class="flex items-center justify-between gap-4">
-            <div class="space-y-1">
-              <h3 class="font-semibold">{section.title} Criteria</h3>
-              <p class="text-muted-foreground text-sm">
-                {section.category.tags.length} tags
-              </p>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onclick={() => addTag(section.key as CategoryKey)}
-            >
-              Add Tag
-            </Button>
-          </div>
+          <CategoryHeader
+            title={section.title}
+            categoryKey={section.key as CategoryKey}
+            tagCount={section.category.tags.length}
+            onAddTag={addTag}
+            onCopyCategory={copyCategory}
+          />
 
           <div class="space-y-2">
             <!-- <Label>Category Label</Label> -->
             <Input type="hidden" bind:value={section.category.label} required />
           </div>
-
           {#each section.category.tags as tag, index (`${section.key}-${index}`)}
             <Collapsible.Root
               open={openTagKey === `${section.key}-${index}`}
