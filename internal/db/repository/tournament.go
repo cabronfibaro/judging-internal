@@ -78,7 +78,7 @@ func (r *SQLiteTournamentRepository) CreateTournament(ctx context.Context, req C
 		}
 	}
 
-	challonge, err := challonge.CreateTournament(
+	challongeRes, err := challonge.CreateTournament(
 		ctx,
 		r.ChallongeAPIKey,
 		name,
@@ -89,8 +89,8 @@ func (r *SQLiteTournamentRepository) CreateTournament(ctx context.Context, req C
 		return nil, err
 	}
 
-	challongeID := challonge.Data.ID
-	challongeURL := challonge.Data.Attributes.URL
+	challongeID := challongeRes.Data.ID
+	challongeURL := challongeRes.Data.Attributes.URL
 
 	// randomize qualifying order if enabled
 	if req.RandomizeQualifyingOrder {
@@ -220,8 +220,10 @@ INSERT INTO brackets (
 		return nil, err
 	}
 
-	// TODO: should remove challonge tournament if transaction fails
 	if err := tx.Commit(); err != nil {
+		if err := challonge.DeleteTournament(ctx, r.ChallongeAPIKey, challongeID); err != nil {
+			return nil, err
+		}
 		return nil, err
 	}
 
