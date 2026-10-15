@@ -68,6 +68,8 @@
             matches={matchesQuery.data ?? []}
             activeBattles={activeBattles.data ?? []}
             {judgement}
+            progress={tournamentQuery.data.progress ?? 0}
+            finalized={tournamentQuery.data.finalized ?? false}
           />
         {/if}
       </StageCard>

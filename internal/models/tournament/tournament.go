@@ -11,4 +11,5 @@ type Tournament struct {
 	Size            int     `json:"size"`
 	Progress        float64 `json:"progress"`
 	CriteriaConfig  string  `json:"criteriaConfig"`
+	Finalized       bool    `json:"finalized"`
 }

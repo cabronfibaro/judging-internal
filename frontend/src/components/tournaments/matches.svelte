@@ -30,6 +30,8 @@
     ResetBattle,
     ConcludeBattle,
     SyncTournament,
+    UpdateTournamentState,
+    UpdateTournament,
   } from "$wails/go/main/App";
   import { tournament, type repository } from "$wails/go/models";
   import type { Judgement } from "$src/lib/judging.svelte";
@@ -48,12 +50,16 @@
     judgement,
     stage,
     activeBattles,
+    progress,
+    finalized,
   }: {
     tournamentID: string;
     matches: Tournament.GroupedMatches;
     judgement: Judgement;
     stage: Stage;
     activeBattles: Battles;
+    progress: number;
+    finalized: boolean;
   } = $props();
 
   const queryClient = useQueryClient();
@@ -161,6 +167,10 @@
     await SyncTournament(tournamentID);
 
     await queryClient.invalidateQueries({
+      queryKey: ["tournament", tournamentID],
+    });
+
+    await queryClient.invalidateQueries({
       queryKey: ["activeBattles", tournamentID],
     });
 
@@ -217,6 +227,22 @@
       }
     }
     return keys;
+  }
+
+  let finalizeDialogOpen = $state(false);
+
+  async function handleFinalize() {
+    isProcessing = true;
+
+    try {
+      await UpdateTournamentState(tournamentID, "finalize");
+      await queryClient.invalidateQueries({
+        queryKey: ["tournament", tournamentID],
+      });
+      finalizeDialogOpen = false;
+    } finally {
+      isProcessing = false;
+    }
   }
 </script>
 
@@ -418,4 +444,38 @@
       </TabsContent>
     {/each}
   </Tabs>
+  {#if progress >= 100 && !finalized}
+    <div class="w-full pt-4">
+      <AlertDialog bind:open={finalizeDialogOpen}>
+        <AlertDialogTrigger class="w-full">
+          <Button class="w-full" variant="default" disabled={isProcessing}
+            >Mark as Done</Button
+          >
+        </AlertDialogTrigger>
+
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mark tournament as done?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will finalize the tournament. Make sure all matches have been
+              concluded before continuing. This action may not be reversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel
+            >
+
+            <AlertDialogAction disabled={isProcessing} onclick={handleFinalize}>
+              {#if isProcessing}
+                Finalizing...
+              {:else}
+                Confirm
+              {/if}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  {/if}
 </div>

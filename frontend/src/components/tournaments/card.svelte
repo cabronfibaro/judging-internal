@@ -45,15 +45,19 @@
             >
               {tournament.name}
             </h2>
-            <Badge
-              variant={tournament.status === "qualifying"
-                ? "secondary"
-                : "default"}
-            >
-              {tournament.status === "qualifying"
-                ? "Qualifying"
-                : "Elimination"}
-            </Badge>
+            {#if !tournament.finalized}
+              <Badge
+                variant={tournament.status === "qualifying"
+                  ? "secondary"
+                  : "default"}
+              >
+                {#if tournament.status === "qualifying"}
+                  Qualifying
+                {:else if tournament.status === "elimination"}
+                  Elimination
+                {/if}
+              </Badge>
+            {/if}
           </div>
         </div>
 

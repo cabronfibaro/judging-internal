@@ -38,11 +38,7 @@ func NewApp(cfg *config.Config) *App {
 // startup is called when the app starts.
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-
 	client = db.Client(path.Join(a.cfg.Workspace, "sqlite.db"))
-	if err := client.Ping(); err != nil {
-		panic(fmt.Sprintf("could not return connection from database: %v", err))
-	}
 
 	a.tournamentRepo = &repository.SQLiteTournamentRepository{
 		DB:              client,

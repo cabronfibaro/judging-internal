@@ -275,6 +275,7 @@ export namespace repository {
 	    startingDate?: string;
 	    track?: string;
 	    qualifyingOrder?: string[];
+	    status?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new UpdateTournamentRequest(source);
@@ -287,6 +288,7 @@ export namespace repository {
 	        this.startingDate = source["startingDate"];
 	        this.track = source["track"];
 	        this.qualifyingOrder = source["qualifyingOrder"];
+	        this.status = source["status"];
 	    }
 	}
 
@@ -305,6 +307,7 @@ export namespace tournament {
 	    size: number;
 	    progress: number;
 	    criteriaConfig: string;
+	    finalized: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Tournament(source);
@@ -322,6 +325,7 @@ export namespace tournament {
 	        this.size = source["size"];
 	        this.progress = source["progress"];
 	        this.criteriaConfig = source["criteriaConfig"];
+	        this.finalized = source["finalized"];
 	    }
 	}
 

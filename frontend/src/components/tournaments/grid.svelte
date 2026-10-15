@@ -78,7 +78,9 @@
       : `${tournaments.length} tournaments`,
   );
   const activeCount = $derived(
-    tournaments.filter((t) => t.status === "elimination").length,
+    tournaments.filter((t) => {
+      return t.status === "elimination" && !t.finalized;
+    }).length,
   );
   const qualifyingCount = $derived(
     tournaments.filter((t) => t.status === "qualifying").length,

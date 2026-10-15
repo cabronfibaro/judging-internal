@@ -239,11 +239,79 @@ INSERT INTO brackets (
 	}, nil
 }
 
+func (r *SQLiteTournamentRepository) setTournamentProgress(
+	tournaments []tournament.Tournament,
+) error {
+	rows, err := r.DB.Query(`
+		SELECT
+			b.tournament_id,
+			COUNT(DISTINCT n.match_id) AS total_matches,
+			COUNT(DISTINCT CASE
+				WHEN n.status = 'complete' THEN n.match_id
+			END) AS completed_matches
+		FROM brackets b
+		JOIN nodes n ON n.bracket_id = b.id
+		GROUP BY b.tournament_id
+	`)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	type progress struct {
+		total     int
+		completed int
+	}
+
+	progressByTournament := make(map[string]progress)
+
+	for rows.Next() {
+		var tournamentID string
+		var p progress
+
+		if err := rows.Scan(
+			&tournamentID,
+			&p.total,
+			&p.completed,
+		); err != nil {
+			return err
+		}
+
+		progressByTournament[tournamentID] = p
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	for i := range tournaments {
+		p := progressByTournament[tournaments[i].ID]
+
+		if p.total == 0 {
+			tournaments[i].Progress = 0
+			continue
+		}
+
+		value := float64(p.completed) / float64(p.total) * 100
+
+		if value < 0 {
+			value = 0
+		} else if value > 100 {
+			value = 100
+		}
+
+		tournaments[i].Progress = value
+	}
+
+	return nil
+}
+
 func (r *SQLiteTournamentRepository) GetTournaments() ([]tournament.Tournament, error) {
 	var tournaments []tournament.Tournament
 	rows, err := r.DB.Query(`
 SELECT 
-	t1.id, t1.name, t1.starting_date, t2.name as track, t1.qualifying_order, t1.size, t1.status, t3.url 
+	t1.id, t1.name, t1.starting_date, t2.name as track, t1.qualifying_order, t1.size, t1.status, t3.url,
+	CASE WHEN t3.status = 'finalized' THEN 1 ELSE 0 END AS finalized
 FROM tournaments t1
 LEFT JOIN tracks t2
 	ON t1.track_id = t2.id
@@ -267,6 +335,7 @@ LEFT JOIN brackets t3
 			&t.Size,
 			&t.Status,
 			&t.URL,
+			&t.Finalized,
 		); err != nil {
 			return nil, err
 		}
@@ -278,60 +347,8 @@ LEFT JOIN brackets t3
 		return tournaments, err
 	}
 
-	progressRows, err := r.DB.Query(`
-SELECT
-    b.tournament_id,
-    COUNT(DISTINCT n.match_id) AS total_matches,
-    COUNT(DISTINCT CASE
-        WHEN n.status = 'complete' THEN n.match_id
-    END) AS completed_matches
-FROM brackets b
-JOIN nodes n ON n.bracket_id = b.id
-GROUP BY b.tournament_id
-`)
-	if err != nil {
+	if err := r.setTournamentProgress(tournaments); err != nil {
 		return nil, err
-	}
-	defer progressRows.Close()
-
-	totalMatchesByTournament := make(map[string]int)
-	completedMatchesByTournament := make(map[string]int)
-
-	for progressRows.Next() {
-		var tournamentID string
-		var totalMatches, completedMatches int
-
-		if err := progressRows.Scan(&tournamentID, &totalMatches, &completedMatches); err != nil {
-			return nil, err
-		}
-
-		totalMatchesByTournament[tournamentID] = totalMatches
-		completedMatchesByTournament[tournamentID] = completedMatches
-	}
-
-	if err := progressRows.Err(); err != nil {
-		return nil, err
-	}
-
-	for i := range tournaments {
-		tournamentID := tournaments[i].ID
-
-		if total, ok := totalMatchesByTournament[tournamentID]; ok && total > 0 {
-			progress := 0.0
-			if total > 0 {
-				progress = (float64(completedMatchesByTournament[tournamentID]) / float64(total)) * 100
-			}
-
-			if progress < 0 {
-				progress = 0
-			} else if progress > 100 {
-				progress = 100
-			}
-
-			tournaments[i].Progress = progress
-		} else {
-			tournaments[i].Progress = 0
-		}
 	}
 
 	return tournaments, nil
@@ -350,7 +367,8 @@ SELECT
 	t1.size,
 	t1.status,
 	t3.url,
-	t1.criteria_config
+	t1.criteria_config,
+	CASE WHEN t3.status = 'finalized' THEN 1 ELSE 0 END AS finalized
 FROM tournaments t1
 LEFT JOIN tracks t2
 	ON t1.track_id = t2.id
@@ -367,12 +385,18 @@ WHERE t1.id = ?
 		&t.Status,
 		&t.URL,
 		&t.CriteriaConfig,
+		&t.Finalized,
 	)
 	if err != nil {
 		return tournament.Tournament{}, err
 	}
 
-	return t, nil
+	updated := []tournament.Tournament{t}
+	if err := r.setTournamentProgress(updated); err != nil {
+		return tournament.Tournament{}, err
+	}
+
+	return updated[0], nil
 }
 
 func (r *SQLiteTournamentRepository) DeleteTournamentById(
@@ -380,13 +404,14 @@ func (r *SQLiteTournamentRepository) DeleteTournamentById(
 	id string,
 ) error {
 	var challongeID string
+	var status string
 
 	err := r.DB.QueryRowContext(ctx, `
-		SELECT challonge_id
+		SELECT challonge_id, status
 		FROM brackets
 		WHERE tournament_id = ?
 		LIMIT 1
-	`, id).Scan(&challongeID)
+	`, id).Scan(&challongeID, &status)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -411,8 +436,11 @@ func (r *SQLiteTournamentRepository) DeleteTournamentById(
 		return sql.ErrNoRows
 	}
 
-	if err := challonge.DeleteTournament(ctx, r.ChallongeAPIKey, challongeID); err != nil {
-		return err
+	// only remove challonge's tournament entry that is not finalized yet
+	if status != "finalized" {
+		if err := challonge.DeleteTournament(ctx, r.ChallongeAPIKey, challongeID); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -424,6 +452,7 @@ type UpdateTournamentRequest struct {
 	StartingDate    *string   `json:"startingDate"`
 	Track           *string   `json:"track"`
 	QualifyingOrder *[]string `json:"qualifyingOrder"`
+	Status          *string   `json:"status"`
 }
 
 func (r *SQLiteTournamentRepository) UpdateTournament(
@@ -486,8 +515,11 @@ func (r *SQLiteTournamentRepository) UpdateTournament(
 	return nil
 }
 
-func (r *SQLiteTournamentRepository) UpdateTournamentState(ctx context.Context, id, state string) error {
-	validStates := map[string]bool{
+func (r *SQLiteTournamentRepository) UpdateTournamentState(
+	ctx context.Context,
+	id, state string,
+) error {
+	var validStates = map[string]bool{
 		"process_checkin":      true,
 		"abort_checkin":        true,
 		"start_group_stage":    true,
@@ -503,13 +535,13 @@ func (r *SQLiteTournamentRepository) UpdateTournamentState(ctx context.Context, 
 		return fmt.Errorf("state %q is invalid", state)
 	}
 
-	var challongeUrl string
+	var challongeURL string
 	err := r.DB.QueryRowContext(ctx, `
 		SELECT url
 		FROM brackets
 		WHERE tournament_id = ?
 		LIMIT 1
-	`, id).Scan(&challongeUrl)
+	`, id).Scan(&challongeURL)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return errors.New("bracket not found")
@@ -520,29 +552,43 @@ func (r *SQLiteTournamentRepository) UpdateTournamentState(ctx context.Context, 
 	if err := challonge.UpdateTournamentState(
 		ctx,
 		r.ChallongeAPIKey,
-		challongeUrl,
+		challongeURL,
 		state,
 	); err != nil {
 		return err
 	}
 
-	if state == "start" {
-		result, err := r.DB.ExecContext(ctx, `
-			UPDATE brackets
-			SET status = 'started'
-			WHERE tournament_id = ?
-		`, id)
-		if err != nil {
-			return err
-		}
+	var status string
 
-		updated, err := result.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if updated == 0 {
-			return errors.New("cannot update bracket status to started")
-		}
+	switch state {
+	case "start":
+		status = "started"
+	case "finalize":
+		status = "finalized"
+	case "reset":
+		status = "not_started"
+	}
+
+	if status == "" {
+		return nil
+	}
+
+	result, err := r.DB.ExecContext(ctx, `
+		UPDATE brackets
+		SET status = ?
+		WHERE tournament_id = ?
+	`, status, id)
+	if err != nil {
+		return err
+	}
+
+	updated, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if updated == 0 {
+		return fmt.Errorf("cannot update bracket status to %s", status)
 	}
 
 	return nil
