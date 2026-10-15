@@ -83,6 +83,7 @@
                 day: "2-digit",
                 month: "short",
                 year: "numeric",
+                timeZone: "Asia/Makassar",
               })}
             </span>
           </div>

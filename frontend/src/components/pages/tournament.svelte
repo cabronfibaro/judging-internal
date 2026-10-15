@@ -18,6 +18,7 @@
   import BattleHandler from "../judging/battle-handler.svelte";
   import { fade } from "svelte/transition";
   import { onMount } from "svelte";
+  import Breadcrumb from "../breadcrumb.svelte";
 
   let { params = {} } = $props();
   const tournamentID = $derived(params.id);
@@ -54,6 +55,14 @@
   onMount(() => {
     mounted = true;
   });
+
+  const breadcrumbs = $derived([
+    { label: "Tournaments", href: "/" },
+    {
+      label: tournamentQuery.data?.name ?? "Loading...",
+      href: `/tournaments/${tournamentID}`,
+    },
+  ]);
 </script>
 
 {#if mounted}
@@ -62,6 +71,7 @@
       {@const tournament = tournamentQuery.data}
       {@const isQualifying = tournament.status === "qualifying"}
       <div class="mx-auto max-w-6xl space-y-4 p-6">
+        <Breadcrumb items={breadcrumbs} />
         <StageCard>
           {#if isQualifying}
             <EntrantList

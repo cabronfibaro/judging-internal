@@ -155,7 +155,7 @@
 {:else}
   <div class="w-full space-y-6">
     <div
-      class="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between"
+      class="flex flex-col gap-4 pb-5 sm:flex-row sm:items-end sm:justify-between"
     >
       <div class="min-w-0">
         <div class="flex flex-wrap items-center gap-3">
