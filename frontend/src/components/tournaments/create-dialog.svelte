@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { createMutation, useQueryClient } from "@tanstack/svelte-query";
+  import {
+    createMutation,
+    createQuery,
+    useQueryClient,
+  } from "@tanstack/svelte-query";
   import { Plus } from "@lucide/svelte";
   import { Button } from "$src/components/ui/button";
   import {
@@ -14,9 +18,10 @@
   import { Input } from "$src/components/ui/input";
   import { Label } from "$src/components/ui/label";
   import { Textarea } from "$src/components/ui/textarea";
+  import * as Select from "$src/components/ui/select";
   import Switch from "$src/components/ui/switch/switch.svelte";
 
-  import { CreateTournament } from "$wails/go/main/App";
+  import { CreateTournament, GetCriteriaConfigs } from "$wails/go/main/App";
 
   let { open = $bindable(false) } = $props();
   let error = $state("");
@@ -26,8 +31,14 @@
   let trackName = $state("");
   let entrantNames = $state("");
   let randomizeQualifyingOrder = $state(true);
+  let criteriaConfigID = $state<number | undefined>(undefined);
 
   const queryClient = useQueryClient();
+
+  const criteriaConfigsQuery = createQuery(() => ({
+    queryKey: ["criteria-configs"],
+    queryFn: () => GetCriteriaConfigs(),
+  }));
 
   const createTournamentMutation = createMutation(() => ({
     mutationFn: async ({
@@ -37,6 +48,7 @@
       track,
       entrants,
       randomizeQualifyingOrder,
+      criteriaConfigID,
     }: {
       name: string;
       size: number;
@@ -44,6 +56,7 @@
       track: string;
       entrants: string[];
       randomizeQualifyingOrder: boolean;
+      criteriaConfigID: number;
     }) =>
       CreateTournament({
         name,
@@ -53,6 +66,7 @@
         entrants,
         randomizeQualifyingOrder,
         qualifyingOrder: [],
+        criteriaConfigID,
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -64,6 +78,7 @@
       trackName = "";
       entrantNames = "";
       error = "";
+      criteriaConfigID = undefined;
     },
   }));
 
@@ -81,6 +96,12 @@
       error = "Track is required.";
       return;
     }
+
+    if (!criteriaConfigID) {
+      error = "Criteria config is required";
+      return;
+    }
+
     const entrants = entrantNames
       .split("\n")
       .map((name) => name.trim())
@@ -96,6 +117,7 @@
       track: trackName.trim(),
       entrants,
       randomizeQualifyingOrder,
+      criteriaConfigID,
     });
   }
 </script>
@@ -172,6 +194,45 @@
         <Label>Randomize Qualifying Order</Label>
         <Switch bind:checked={randomizeQualifyingOrder} />
       </div>
+      <div class="space-y-2">
+        <Label for="criteria-config">Criteria configuration</Label>
+
+        <Select.Root
+          type="single"
+          value={criteriaConfigID?.toString() ?? ""}
+          onValueChange={(value) => {
+            criteriaConfigID = value ? Number(value) : undefined;
+          }}
+        >
+          <Select.Trigger id="criteria-config" class="w-full">
+            {#if criteriaConfigsQuery.isPending}
+              Loading criteria configurations...
+            {:else}
+              {criteriaConfigsQuery.data?.find(
+                (config) => config.id === criteriaConfigID,
+              )?.name ?? "Select a criteria configuration"}
+            {/if}
+          </Select.Trigger>
+
+          <Select.Content>
+            {#each criteriaConfigsQuery.data ?? [] as config (config.id)}
+              <Select.Item value={config.id.toString()}>
+                {config.name}
+              </Select.Item>
+            {/each}
+          </Select.Content>
+        </Select.Root>
+        {#if criteriaConfigsQuery.isError}
+          <p class="text-sm text-destructive">
+            Failed to load criteria configurations.
+          </p>
+        {:else if !criteriaConfigsQuery.isPending && !criteriaConfigsQuery.data?.length}
+          <p class="text-sm text-muted-foreground">
+            No criteria configurations found. Create one before creating a
+            tournament.
+          </p>
+        {/if}
+      </div>
       {#if error}
         <p class="text-sm text-destructive">
           {error}
@@ -185,7 +246,9 @@
     </div>
     <DialogFooter>
       <Button
-        disabled={createTournamentMutation.isPending}
+        disabled={createTournamentMutation.isPending ||
+          criteriaConfigsQuery.isPending ||
+          !criteriaConfigsQuery.data?.length}
         onclick={createTournament}
       >
         {createTournamentMutation.isPending

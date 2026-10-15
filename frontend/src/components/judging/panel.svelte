@@ -11,24 +11,31 @@
   import Spinner from "$src/components/ui/spinner/spinner.svelte";
   import CommonCriteria from "./common-criteria.svelte";
   import CriteriaWrapper from "./criteria-wrapper.svelte";
+  import type { tournament, repository } from "$wails/go/models";
 
   let {
+    tournament,
     judgement,
-    categories,
     isQualifying,
     stage,
     children,
   }: {
+    tournament: tournament.Tournament;
     judgement: Judgement;
-    categories: [string, Judging.CriteriaCategory][];
     isQualifying: boolean;
     stage: Stage;
     children: Snippet<[]>;
   } = $props();
 
-  let common = $derived(categories.find(([id]) => id === "common"));
-  let lead = $derived(categories.find(([id]) => id === "lead"));
-  let chase = $derived(categories.find(([id]) => id === "chase"));
+  const criteriaConfig = $derived(
+    JSON.parse(tournament.criteriaConfig) as repository.CriteriaCategories,
+  );
+
+  const categories = $derived(Object.entries(criteriaConfig));
+
+  const common = $derived(categories.find(([id]) => id === "common"));
+  const lead = $derived(categories.find(([id]) => id === "lead"));
+  const chase = $derived(categories.find(([id]) => id === "chase"));
 </script>
 
 <div class="relative flex flex-col gap-5" aria-busy={judgement.processing}>

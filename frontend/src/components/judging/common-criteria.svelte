@@ -9,13 +9,14 @@
   } from "$src/components/ui/card";
   import { Separator } from "$src/components/ui/separator";
   import type { Judgement } from "$src/lib/judging.svelte";
+  import type { repository } from "$wails/go/models";
 
   let {
     category,
     judgement,
     isQualifying,
   }: {
-    category: Judging.CriteriaCategory;
+    category: repository.CriteriaCategory;
     judgement: Judgement;
     isQualifying: boolean;
   } = $props();

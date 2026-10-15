@@ -1,7 +1,6 @@
 <script lang="ts">
   // TOOD (important): LOADING STATE FOR tournament, matches, activeBattles, entrants
   import { createQuery } from "@tanstack/svelte-query";
-  import DefaultCriteria from "$src/data/criteria/default-criteria.json";
 
   import Main from "../layout/main.svelte";
   import {
@@ -24,9 +23,6 @@
 
   let stage = new Stage();
   let judgement = new Judgement();
-
-  const criteriaConfig = $derived(DefaultCriteria as Judging.CriteriaConfig);
-  const categories = $derived(Object.entries(criteriaConfig.categories));
 
   const tournamentQuery = createQuery(() => ({
     queryKey: ["tournament", tournamentID],
@@ -76,7 +72,12 @@
         {/if}
       </StageCard>
 
-      <Panel {stage} {judgement} {categories} {isQualifying}>
+      <Panel
+        {stage}
+        {judgement}
+        tournament={tournamentQuery.data ?? {}}
+        {isQualifying}
+      >
         {#if isQualifying}
           <QualifyingHandler
             {tournament}

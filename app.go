@@ -130,7 +130,7 @@ func (a *App) GetTournament(id string) (tournament.Tournament, error) {
 func (a *App) CreateTournament(req repository.CreateTournamentRequest) (tournament.Tournament, error) {
 	t, err := a.tournamentRepo.CreateTournament(a.ctx, req)
 	if err != nil {
-		runtime.LogErrorf(a.ctx, "Failed to get tournaments: %v", err)
+		runtime.LogErrorf(a.ctx, "Failed to create tournament: %v", err)
 		return tournament.Tournament{}, err
 	}
 

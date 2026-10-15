@@ -6,6 +6,7 @@
     SelectTrigger,
     SelectValue,
   } from "$src/components/ui/select";
+  import type { repository } from "$wails/go/models";
   import Slider from "../ui/slider/slider.svelte";
   import Switch from "../ui/switch/switch.svelte";
 
@@ -14,14 +15,14 @@
     value = 0,
     onValueChange,
   }: {
-    tag: Judging.Tag;
+    tag: repository.CriteriaTag;
     value?: unknown;
     onValueChange: (value: unknown) => void;
   } = $props();
 </script>
 
-{#if tag.value_type === "enum"}
-  <Select
+{#if tag.valueType === "enum"}
+  <!-- <Select
     type="single"
     onValueChange={(selected) => onValueChange(Number(selected))}
   >
@@ -30,14 +31,14 @@
     </SelectTrigger>
 
     <SelectContent>
-      {#each tag.options ?? [] as option (option.value)}
+      {#each tag. ?? [] as option (option.value)}
         <SelectItem value={String(option.value)}>
           {option.label}
         </SelectItem>
       {/each}
     </SelectContent>
-  </Select>
-{:else if tag.value_type === "dynamic"}
+  </Select> -->
+{:else if tag.valueType === "dynamic"}
   <div class="flex items-center justify-end gap-3 sm:justify-center">
     <Slider
       type="single"
@@ -59,12 +60,12 @@
 			{Math.abs(Number(value ?? 0)) / (tag.multiplier ?? 1)}
 		</span> -->
   </div>
-{:else if tag.value_type === "switch"}
+{:else if tag.valueType === "switch"}
   <Switch
     aria-label={tag.label}
     checked={Number(value ?? 0) !== 0}
     onCheckedChange={(checked) => {
-      const amount = Number(tag.default_value ?? 0);
+      const amount = Number(tag.defaultValue ?? 0);
 
       if (checked) {
         onValueChange(Number(value ?? 0) + amount);

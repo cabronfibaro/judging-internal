@@ -22,6 +22,7 @@ type CreateTournamentRequest struct {
 	Entrants                 []string `json:"entrants"`
 	RandomizeQualifyingOrder bool     `json:"randomizeQualifyingOrder"`
 	QualifyingOrder          []string `json:"qualifyingOrder"`
+	CriteriaConfigID         int      `json:"criteriaConfigID"`
 }
 
 type BracketMatch struct {
@@ -111,6 +112,7 @@ func (r *SQLiteTournamentRepository) CreateTournament(ctx context.Context, req C
 		return nil, err
 	}
 
+	// track table
 	_, err = tx.ExecContext(ctx, `
 INSERT INTO tracks (id, name, created_at, updated_at)
 VALUES (?, ?, ?, ?)
@@ -133,12 +135,21 @@ ON CONFLICT(name) DO NOTHING
 		return nil, err
 	}
 
+	var criteriaConfig string
+	err = tx.QueryRowContext(ctx, `
+SELECT config from criteria_configs WHERE id = ?
+`, req.CriteriaConfigID).Scan(&criteriaConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// tournaments table
 	if _, err := tx.ExecContext(ctx, `
 INSERT INTO tournaments (
-	id, name, starting_date, track_id, qualifying_order,
-	size, randomize_qualifying_order, status, created_at, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`,
+    id, name, starting_date, track_id, qualifying_order,
+    size, randomize_qualifying_order, status, created_at, updated_at, criteria_config
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`,
 		tournamentID,
 		name,
 		startingDate.Unix(),
@@ -149,6 +160,7 @@ INSERT INTO tournaments (
 		"qualifying",
 		now,
 		now,
+		criteriaConfig,
 	); err != nil {
 		return nil, err
 	}
@@ -208,6 +220,7 @@ INSERT INTO brackets (
 		return nil, err
 	}
 
+	// TODO: should remove challonge tournament if transaction fails
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -334,7 +347,8 @@ SELECT
 	t1.qualifying_order,
 	t1.size,
 	t1.status,
-	t3.url
+	t3.url,
+	t1.criteria_config
 FROM tournaments t1
 LEFT JOIN tracks t2
 	ON t1.track_id = t2.id
@@ -350,6 +364,7 @@ WHERE t1.id = ?
 		&t.Size,
 		&t.Status,
 		&t.URL,
+		&t.CriteriaConfig,
 	)
 	if err != nil {
 		return tournament.Tournament{}, err

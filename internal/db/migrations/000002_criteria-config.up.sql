@@ -6,6 +6,8 @@ CREATE TABLE criteria_configs (
     updated_at INTEGER NOT NULL
 );
 
+ALTER TABLE tournaments ADD COLUMN criteria_config TEXT CHECK (criteria_config IS NULL OR json_valid(criteria_config));
+
 INSERT INTO criteria_configs (name, config, created_at, updated_at)
 SELECT
     'Default',

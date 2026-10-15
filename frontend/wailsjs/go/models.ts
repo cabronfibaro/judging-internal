@@ -55,6 +55,7 @@ export namespace repository {
 	    entrants: string[];
 	    randomizeQualifyingOrder: boolean;
 	    qualifyingOrder: string[];
+	    criteriaConfigID: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new CreateTournamentRequest(source);
@@ -69,6 +70,7 @@ export namespace repository {
 	        this.entrants = source["entrants"];
 	        this.randomizeQualifyingOrder = source["randomizeQualifyingOrder"];
 	        this.qualifyingOrder = source["qualifyingOrder"];
+	        this.criteriaConfigID = source["criteriaConfigID"];
 	    }
 	}
 	export class CriteriaTag {
@@ -302,6 +304,7 @@ export namespace tournament {
 	    url: string;
 	    size: number;
 	    progress: number;
+	    criteriaConfig: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Tournament(source);
@@ -318,6 +321,7 @@ export namespace tournament {
 	        this.url = source["url"];
 	        this.size = source["size"];
 	        this.progress = source["progress"];
+	        this.criteriaConfig = source["criteriaConfig"];
 	    }
 	}
 

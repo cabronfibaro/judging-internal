@@ -10,4 +10,5 @@ type Tournament struct {
 	URL             string  `json:"url"`
 	Size            int     `json:"size"`
 	Progress        float64 `json:"progress"`
+	CriteriaConfig  string  `json:"criteriaConfig"`
 }
