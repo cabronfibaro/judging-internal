@@ -3,19 +3,26 @@ package db
 import (
 	"database/sql"
 	"log"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func Client(src string) *sql.DB {
-	db, err := sql.Open("sqlite3", src)
-	if err != nil {
-		panic(err)
+	separator := "?"
+	if strings.Contains(src, "?") {
+		separator = "&"
 	}
 
-	// enable foreign key support for this connection
-	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
-		log.Fatalf("failed to enable foreign keys: %v", err)
+	dsn := src + separator + "_foreign_keys=on"
+
+	db, err := sql.Open("sqlite3", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := db.Ping(); err != nil {
+		log.Fatal(err)
 	}
 
 	return db
