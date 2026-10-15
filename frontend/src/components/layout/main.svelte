@@ -1,18 +1,17 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
   import { link } from "svelte-spa-router";
+  import active from "svelte-spa-router/active";
   import { cn } from "$src/utils";
   import { Button } from "$src/components/ui/button";
   import Separator from "$src/components/ui/separator/separator.svelte";
   import ThemeToggle from "./theme-toggle.svelte";
   import Menu from "@lucide/svelte/icons/menu";
   import X from "@lucide/svelte/icons/x";
-  import LayoutDashboard from "@lucide/svelte/icons/layout-dashboard";
   import Trophy from "@lucide/svelte/icons/trophy";
   import UsersRound from "@lucide/svelte/icons/users-round";
   import MapPinned from "@lucide/svelte/icons/map-pinned";
   import SliderHorizontal from "@lucide/svelte/icons/sliders-horizontal";
-  import ChevronRight from "@lucide/svelte/icons/chevron-right";
 
   let {
     fixed = false,
@@ -27,13 +26,6 @@
   } = $props();
 
   let mobileNavOpen = $state(false);
-
-  // const onTournamentRoute = $derived(
-  //   page.url.pathname.startsWith("/tournaments"),
-  // );
-  // const tournamentsActive = $derived(
-  //   page.url.pathname === "/" || onTournamentRoute,
-  // );
 
   function closeMobileNav() {
     mobileNavOpen = false;
@@ -51,7 +43,7 @@
       <div
         class="flex size-9 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground"
       >
-        <LayoutDashboard class="size-4" aria-hidden="true" />
+        <!-- <LayoutDashboard class="size-4" aria-hidden="true" /> -->
       </div>
       <div class="min-w-0">
         <p class="truncate text-sm font-semibold text-sidebar-foreground">
@@ -72,12 +64,15 @@
 
       <a
         href="/"
-        // aria-current={tournamentsActive ? "page" : undefined}
+        use:link
+        use:active={{
+          path: "/",
+          className: "bg-sidebar-accent text-sidebar-accent-foreground",
+          inactiveClassName:
+            "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground",
+        }}
         class={cn(
           "group flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
-          // tournamentsActive
-          //   ? "bg-sidebar-accent text-sidebar-accent-foreground"
-          //   : "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground",
         )}
       >
         <Trophy class="size-4" aria-hidden="true" />
@@ -120,11 +115,14 @@
       <a
         href="/criteria-configs"
         use:link
+        use:active={{
+          path: "/criteria-configs",
+          className: "bg-sidebar-accent text-sidebar-accent-foreground",
+          inactiveClassName:
+            "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground",
+        }}
         class={cn(
           "group flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
-          // tournamentsActive
-          //   ? "bg-sidebar-accent text-sidebar-accent-foreground"
-          //   : "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground",
         )}
       >
         <SliderHorizontal class="size-4" aria-hidden="true" />
@@ -178,7 +176,7 @@
         <div
           class="hidden items-center gap-2 text-sm text-muted-foreground lg:flex"
         >
-          <LayoutDashboard class="size-4" aria-hidden="true" />
+          <!-- <LayoutDashboard class="size-4" aria-hidden="true" /> -->
           <!-- <span>{onTournamentRoute ? "Tournament workspace" : "Overview"}</span> -->
         </div>
       </div>
@@ -199,9 +197,7 @@
           <div class="flex items-center gap-3">
             <div
               class="flex size-9 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground"
-            >
-              <LayoutDashboard class="size-4" aria-hidden="true" />
-            </div>
+            ></div>
             <p class="text-sm font-semibold text-sidebar-foreground">
               Judging Console
             </p>

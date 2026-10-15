@@ -2,7 +2,6 @@
   // TOOD (important): LOADING STATE FOR tournament, matches, activeBattles, entrants
   import { createQuery } from "@tanstack/svelte-query";
 
-  import Main from "../layout/main.svelte";
   import {
     GetTournament,
     GetEntrants,
@@ -17,6 +16,8 @@
   import QualifyingHandler from "../judging/qualifying-handler.svelte";
   import Matches from "../tournaments/matches.svelte";
   import BattleHandler from "../judging/battle-handler.svelte";
+  import { fade } from "svelte/transition";
+  import { onMount } from "svelte";
 
   let { params = {} } = $props();
   const tournamentID = $derived(params.id);
@@ -48,48 +49,55 @@
     enabled: !!tournamentID,
     queryFn: () => GetEntrants(tournamentID),
   }));
+
+  let mounted = $state(false);
+  onMount(() => {
+    mounted = true;
+  });
 </script>
 
-<Main>
-  {#if tournamentQuery.data}
-    {@const tournament = tournamentQuery.data}
-    {@const isQualifying = tournament.status === "qualifying"}
-    <div class="mx-auto max-w-6xl space-y-4 p-6">
-      <StageCard>
-        {#if isQualifying}
-          <EntrantList
-            tournament={tournamentQuery.data ?? {}}
-            entrants={entrantsQuery.data ?? []}
-          />
-        {:else}
-          <Matches
-            {tournamentID}
-            {stage}
-            matches={matchesQuery.data ?? []}
-            activeBattles={activeBattles.data ?? []}
-            {judgement}
-            progress={tournamentQuery.data.progress ?? 0}
-            finalized={tournamentQuery.data.finalized ?? false}
-          />
-        {/if}
-      </StageCard>
+{#if mounted}
+  <div in:fade={{ duration: 300 }}>
+    {#if tournamentQuery.data}
+      {@const tournament = tournamentQuery.data}
+      {@const isQualifying = tournament.status === "qualifying"}
+      <div class="mx-auto max-w-6xl space-y-4 p-6">
+        <StageCard>
+          {#if isQualifying}
+            <EntrantList
+              tournament={tournamentQuery.data ?? {}}
+              entrants={entrantsQuery.data ?? []}
+            />
+          {:else}
+            <Matches
+              {tournamentID}
+              {stage}
+              matches={matchesQuery.data ?? []}
+              activeBattles={activeBattles.data ?? []}
+              {judgement}
+              progress={tournamentQuery.data.progress ?? 0}
+              finalized={tournamentQuery.data.finalized ?? false}
+            />
+          {/if}
+        </StageCard>
 
-      <Panel
-        {stage}
-        {judgement}
-        tournament={tournamentQuery.data ?? {}}
-        {isQualifying}
-      >
-        {#if isQualifying}
-          <QualifyingHandler
-            {tournament}
-            {judgement}
-            entrants={entrantsQuery.data ?? []}
-          />
-        {:else}
-          <BattleHandler {tournamentID} {judgement} {stage} />
-        {/if}
-      </Panel>
-    </div>
-  {/if}
-</Main>
+        <Panel
+          {stage}
+          {judgement}
+          tournament={tournamentQuery.data ?? {}}
+          {isQualifying}
+        >
+          {#if isQualifying}
+            <QualifyingHandler
+              {tournament}
+              {judgement}
+              entrants={entrantsQuery.data ?? []}
+            />
+          {:else}
+            <BattleHandler {tournamentID} {judgement} {stage} />
+          {/if}
+        </Panel>
+      </div>
+    {/if}
+  </div>
+{/if}
