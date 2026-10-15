@@ -127,7 +127,7 @@
 
 {#if mounted}
   <div in:fade={{ duration: 300 }}>
-    <div class="space-y-6 p-6">
+    <div class="space-y-6">
       <div class="flex justify-between items-end">
         <div>
           <h1 class="text-2xl font-semibold">Criteria Configs</h1>

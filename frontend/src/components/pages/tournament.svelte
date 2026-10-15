@@ -70,7 +70,7 @@
     {#if tournamentQuery.data}
       {@const tournament = tournamentQuery.data}
       {@const isQualifying = tournament.status === "qualifying"}
-      <div class="mx-auto max-w-6xl space-y-4 p-6">
+      <div class="mx-auto max-w-6xl space-y-4">
         <Breadcrumb items={breadcrumbs} />
         <StageCard>
           {#if isQualifying}
