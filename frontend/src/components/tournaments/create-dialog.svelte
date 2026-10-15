@@ -4,8 +4,16 @@
     createQuery,
     useQueryClient,
   } from "@tanstack/svelte-query";
+  import CalendarIcon from "@lucide/svelte/icons/calendar";
+  import * as Popover from "$src/components/ui/popover";
   import { Plus } from "@lucide/svelte";
   import { Button } from "$src/components/ui/button";
+  import Clock2Icon from "@lucide/svelte/icons/clock-2";
+  import { getLocalTimeZone, type CalendarDate } from "@internationalized/date";
+  import * as Field from "$src/components/ui/field";
+  import * as InputGroup from "$src/components/ui/input-group";
+  import { Calendar } from "$src/components/ui/calendar";
+
   import {
     Dialog,
     DialogContent,
@@ -27,11 +35,14 @@
   let error = $state("");
   let name = $state("");
   let size = $state(2);
-  let startingDate = $state("");
   let trackName = $state("");
   let entrantNames = $state("");
   let randomizeQualifyingOrder = $state(true);
   let criteriaConfigID = $state<number | undefined>(undefined);
+  let datePopoverOpen = $state(false);
+
+  let selectedDate = $state<CalendarDate | undefined>();
+  let startingTime = $state("12:00");
 
   const queryClient = useQueryClient();
 
@@ -74,7 +85,8 @@
       });
       open = false;
       name = "";
-      startingDate = "";
+      selectedDate = undefined;
+      startingTime = "12:00";
       trackName = "";
       entrantNames = "";
       error = "";
@@ -88,10 +100,19 @@
       error = "Tournament name is required.";
       return;
     }
-    if (!startingDate) {
+
+    if (!selectedDate) {
       error = "Starting date is required.";
       return;
     }
+
+    if (!startingTime) {
+      error = "Starting time is required.";
+      return;
+    }
+
+    const startingDate = `${selectedDate.toString()}T${startingTime}`;
+
     if (!trackName.trim()) {
       error = "Track is required.";
       return;
@@ -159,12 +180,66 @@
           />
         </div>
         <div class="space-y-2">
-          <Label for="starting-date">Starting date</Label>
-          <Input
-            id="starting-date"
-            type="datetime-local"
-            bind:value={startingDate}
-          />
+          <Label>Starting date</Label>
+          <Popover.Root bind:open={datePopoverOpen}>
+            <Popover.Trigger>
+              {#snippet child({ props })}
+                <Button
+                  {...props}
+                  variant="outline"
+                  class="w-full justify-start font-normal"
+                >
+                  <CalendarIcon class="mr-2 size-4" />
+                  {#if selectedDate}
+                    {selectedDate
+                      .toDate(getLocalTimeZone())
+                      .toLocaleDateString()}
+                    at {startingTime}
+                  {:else}
+                    Select date time
+                  {/if}
+                </Button>
+              {/snippet}
+            </Popover.Trigger>
+
+            <Popover.Content class="w-auto p-0" align="start">
+              <div class="p-3">
+                <Calendar
+                  type="single"
+                  bind:value={selectedDate}
+                  captionLayout="dropdown"
+                />
+              </div>
+
+              <div class="border-t bg-card p-3">
+                <Field.Group>
+                  <Field.Field>
+                    <Field.Label for="starting-time">Start time</Field.Label>
+                    <InputGroup.Root>
+                      <InputGroup.Input
+                        id="starting-time"
+                        type="time"
+                        step="60"
+                        bind:value={startingTime}
+                        class="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                      />
+                      <InputGroup.Addon>
+                        <Clock2Icon class="text-muted-foreground" />
+                      </InputGroup.Addon>
+                    </InputGroup.Root>
+                  </Field.Field>
+                </Field.Group>
+
+                <Button
+                  class="mt-3 w-full"
+                  onclick={() => (datePopoverOpen = false)}
+                  disabled={!selectedDate || !startingTime}
+                >
+                  Done
+                </Button>
+              </div>
+            </Popover.Content>
+          </Popover.Root>
         </div>
       </div>
       <div class="space-y-2">

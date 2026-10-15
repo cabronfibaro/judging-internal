@@ -11,13 +11,14 @@
   import Card from "../ui/card/card.svelte";
   import CardContent from "../ui/card/card-content.svelte";
   import Progress from "../ui/progress/progress.svelte";
+  import type { tournament } from "$wails/go/models";
 
   let {
     tournament,
     openDeleteDialog,
     position,
   }: {
-    tournament: any;
+    tournament: tournament.Tournament;
     openDeleteDialog(tournament: any): void;
     position: number;
   } = $props();
@@ -75,7 +76,15 @@
           </div>
           <div class="flex min-w-0 items-center gap-2">
             <CalendarDays class="size-4 shrink-0" aria-hidden="true" />
-            <span class="truncate">{tournament.startingDate}</span>
+            <span class="truncate">
+              {new Date(
+                Number(tournament.starting_date) * 1000,
+              ).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
           </div>
           <a
             href={`https://challonge.com/${tournament.url}`}
